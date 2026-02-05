@@ -4,7 +4,7 @@
 
 # Stage 1: Base with Python + CUDA
 # Use NVIDIA CUDA base image for GPU support
-FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04 AS base
+FROM nvidia/cuda:13.0.1-runtime-ubuntu22.04 AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
