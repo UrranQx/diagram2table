@@ -1,14 +1,13 @@
 # Diagram2Table - Core Dependencies
 # GPU-enabled installation with CUDA 13.0 support
-# For CPU-only: comment out torch and torchvision, or use torch>=2.0.0+cpu
 
 # Core ML - PyTorch with CUDA 13.0 support
-torch==2.10.0+cu130
-torchvision==0.25.0+cu130
+torch==2.10.0
+torchvision==0.25.0
 transformers==4.55.3
 accelerate==1.12.0
-bitsandbytes==0.49.1  # For 4-bit/8-bit quantization
-qwen-vl-utils==0.0.14  # Required for Qwen2-VL vision processing
+bitsandbytes==0.49.1
+qwen-vl-utils==0.0.14
 
 # Image processing
 Pillow==10.4.0
@@ -36,7 +35,7 @@ pydantic-settings==2.12.0
 huggingface-hub==0.36.1
 safetensors==0.7.0
 tokenizers==0.21.4
-tqdm==4.67.3
+tqdm==4.64
 requests==2.32.5
 python-dotenv==1.2.1
 PyYAML==6.0.3

@@ -46,7 +46,8 @@ FROM base AS dependencies
 # Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cu130
 
 # Stage 3: Production
 FROM dependencies AS production

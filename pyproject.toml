@@ -1,0 +1,11 @@
+[build-system]
+requires = ["setuptools>=59.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "diagram2table"
+version = "0.0.1"
+description = "Diagram2Table - minimal project metadata for Docker build"
+readme = "README.md"
+authors = [{name = "UrranQx"}]
+dependencies = []
