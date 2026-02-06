@@ -1,56 +1,67 @@
-# diagram2table 
-Преобразование изображений диаграмм в markdown таблицу.
+# DIAGRAM2TABLE
 ![UI example](image.png)
+## Описание
+DIAGRAM2TABLE — инструмент для преобразования изображений диаграмм (flowchart, BPMN и др.) в структурированные markdown таблицы. Решение автоматизирует извлечение информации из визуальных схем.
 
-## Перед запуском
-### Используйте виртуальное окружение в `.venv`
-```cmd
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-# При наличии видеокарты с CUDA ядрами (для проверки nvidia-smi) запустить также:
-pip install --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cu130
-```
-Примечание: для поддержки SVG требуется ImageMagick и соответствующие делегаты (должен быть в PATH). Для локальной установки:
-- Windows: скачайте ImageMagick с https://imagemagick.org и включите опцию "Install development headers"
-- Linux (apt): sudo apt install imagemagick libmagickwand-dev librsvg2-bin
+## Квикстарт (Быстрый старт)
 
+### 1. Локальный запуск
+1. Создайте виртуальное окружение:
+	```cmd
+	python -m venv .venv
+	.venv\Scripts\activate
+	```
+2. Установите зависимости:
+	```cmd
+	pip install -r requirements.txt
+	```
+3. Для ускорения на GPU (CUDA):
+	```cmd
+	pip install --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cu130
+	```
+4. Для поддержки SVG: установите ImageMagick и делегаты.
+	- Windows: https://imagemagick.org (опция "Install development headers")
+	- Linux: `sudo apt install imagemagick libmagickwand-dev librsvg2-bin`
 
-### Рекомендукю заранее скачать  модель при помощи скрипта `scripts\download_models.py`
-## Запуск проекта
-### Для запуска API + UI используйте параметр "both", а чтобы загрузить квантизированную модель (INT4) используйте флаг `--deployment-mode vlm_quantized`
-Вот например
-```cmd
-python -m src.main both --deployment-mode vlm_quantized
-```
+5. Скачайте модели:
+	```cmd
+	python scripts/download_models.py
+	```
 
-## Docker:
+6. Запустите приложение:
+	```cmd
+	python -m src.main both --deployment-mode vlm_quantized
+	```
 
-Сборка образа:
+### 2. Docker
+Сборка:
 ```cmd
 docker build -t diagram2table:local -f docker/Dockerfile .
 ```
-
-Или 
-
+или
 ```cmd
 docker compose -f docker/docker-compose.yml build --progress=plain --no-cache diagram2table-gpu
 ```
-
-
-Поднять изображение:
-
+Запуск:
 ```cmd
-docker compose up diagram2table-gpu 
+docker compose up diagram2table-gpu
 ```
 
+> Если при сборке появится ошибка `MagickWand shared library not found` — убедитесь, что пакеты `libmagickwand-dev` и `imagemagick` установлены. Если SVG всё ещё не рендерится, добавьте пакет `librsvg2-bin` (в Dockerfile уже включён) и проверьте `/etc/ImageMagick-6/policy.xml`.
 
+## Воспроизводимость и ознакомление
+- Все зависимости указаны в requirements.txt и pyproject.toml
+- Dockerfile и docker-compose.yml обеспечивают воспроизводимость среды
+- Скрипт scripts/download_models.py скачивает необходимые модели
+- Примеры данных и тестовые файлы находятся в папках data/, data2/, data3/
+- UI доступен по адресу http://localhost:7860 после запуска
+- API доступен через endpoints, см. src/api/routes/
 
-Примечание: Если при сборке появится ошибка `MagickWand shared library not found` — убедитесь, что пакеты `libmagickwand-dev` и `imagemagick` установлены. Если SVG всё ещё не рендерится, добавьте пакет `librsvg2-bin` (в Dockerfile уже включён) и проверьте `/etc/ImageMagick-6/policy.xml` — в образе мы уже удаляем политики, блокирующие SVG.
+## Полезные ссылки
+- [arxiv.org/abs/2511.22448](https://arxiv.org/abs/2511.22448)
+- [ieeexplore.ieee.org/document/9980425](https://ieeexplore.ieee.org/document/9980425)
+- [huggingface.co/jtlicardo/bpmn-information-extraction-v2](https://huggingface.co/jtlicardo/bpmn-information-extraction-v2)
+- [github.com/PROSLab/BPMN-Redrawer](https://github.com/PROSLab/BPMN-Redrawer)
 
-
-## Ссылки на полезные исследования в данной области, а также похожие проекты
-- https://arxiv.org/abs/2511.22448
-- https://ieeexplore.ieee.org/document/9980425
-- https://huggingface.co/jtlicardo/bpmn-information-extraction-v2
-- https://github.com/PROSLab/BPMN-Redrawer
+## Контакты
+Для вопросов и предложений пока что используйте раздел Issues.
