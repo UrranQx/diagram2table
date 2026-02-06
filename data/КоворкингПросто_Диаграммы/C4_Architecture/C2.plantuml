@@ -1,0 +1,34 @@
+@startuml
+title C2 - Контейнеры системы "Просто"
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(Client, "Клиент")
+Person(Admin, "Администратор коворкинга")
+Person(Accountant, "Бухгалтер")
+
+System_Ext(PSP, "Платёжный провайдер")
+System_Ext(ACS, "СКУД / система доступа")
+System_Ext(Notifier, "Email / SMS сервис")
+
+System_Boundary(Prsto, "Система онлайн-бронирования коворкинга «Просто»") {
+  Container(WebApp, "Web-клиент", "React / Vue", "Браузерное приложение (клиент + админ + отчёты)")
+  Container(Backend, "Backend API", "NestJS / Spring Boot", "API бронирования/оплат/отмен/отчётов")
+  ContainerDb(DB, "База данных", "PostgreSQL", "Пользователи, места, брони, платежи")
+  Container(Cache, "Кэш", "Redis (опционально)", "Кэширование часто используемых данных")
+}
+
+Rel(Client, WebApp, "Использует через браузер", "HTTPS")
+Rel(Admin, WebApp, "Использует админ-интерфейс", "HTTPS")
+Rel(Accountant, WebApp, "Использует отчёты", "HTTPS")
+
+Rel(WebApp, Backend, "Запросы (бронирование, оплата, отмена)", "HTTPS/JSON")
+Rel(Backend, DB, "Чтение/запись данных", "SQL")
+Rel(Backend, Cache, "Чтение/запись кэша", "Redis protocol")
+
+Rel(Backend, PSP, "Создание и проверка платежей", "REST API")
+Rel(Backend, ACS, "Обмен данными пропусков/QR", "API")
+Rel(Backend, Notifier, "Отправка email/SMS уведомлений", "API")
+
+SHOW_LEGEND()
+@enduml

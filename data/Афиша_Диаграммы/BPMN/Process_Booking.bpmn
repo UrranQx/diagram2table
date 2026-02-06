@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="Participant_1" name="Процесс покупки билета" processRef="Process_1" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_1" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_Buyer" name="Покупатель">
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SelectEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SelectPayment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Link_PaymentStart</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_NoTickets</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ReceiveUserEmail</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Success</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_System" name="Система">
+        <bpmn:flowNodeRef>Task_CheckAvailability</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Availability</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Link_ToPayment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ConfirmOrder</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_PaymentGateway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_PaymentStatus</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CreateOrder</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Split</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Join</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_PaymentFailed</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Seller" name="Продавец">
+        <bpmn:flowNodeRef>Task_ReceiveSellerEmail</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_1" name="Старт">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Task_SelectEvent" name="Выбор мероприятия и нажатие &#34;Купить&#34;">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Task_CheckAvailability" name="Проверка наличия билетов">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_Availability" name="Билеты есть?">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_NoTickets</bpmn:outgoing>
+      <bpmn:outgoing>Flow_YesTickets</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_NoTickets" name="Мест нет">
+      <bpmn:incoming>Flow_NoTickets</bpmn:incoming>
+      <bpmn:messageEventDefinition />
+    </bpmn:endEvent>
+    <bpmn:intermediateThrowEvent id="Link_ToPayment" name="К оплате">
+      <bpmn:incoming>Flow_YesTickets</bpmn:incoming>
+      <bpmn:linkEventDefinition name="PaymentProcess" />
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="Link_PaymentStart" name="К оплате">
+      <bpmn:outgoing>Flow_ToPaymentMethod</bpmn:outgoing>
+      <bpmn:linkEventDefinition name="PaymentProcess" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="Task_SelectPayment" name="Выбор способа оплаты">
+      <bpmn:incoming>Flow_ToPaymentMethod</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_ConfirmOrder" name="Подтверждение заказа">
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Task_PaymentGateway" name="Обработка платежа шлюзом">
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_PaymentStatus" name="Успешно?">
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:outgoing>Flow_PayFail</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PaySuccess</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_CreateOrder" name="Создание заказа в БД">
+      <bpmn:incoming>Flow_PaySuccess</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="Gateway_Split">
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToUser</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ToSeller</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:receiveTask id="Task_ReceiveUserEmail" name="Получить билет на Email">
+      <bpmn:incoming>Flow_ToUser</bpmn:incoming>
+      <bpmn:outgoing>Flow_UserDone</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:receiveTask id="Task_ReceiveSellerEmail" name="Получить уведомление о продаже">
+      <bpmn:incoming>Flow_ToSeller</bpmn:incoming>
+      <bpmn:outgoing>Flow_SellerDone</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:parallelGateway id="Gateway_Join">
+      <bpmn:incoming>Flow_UserDone</bpmn:incoming>
+      <bpmn:incoming>Flow_SellerDone</bpmn:incoming>
+      <bpmn:outgoing>Flow_Final</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_SelectEvent" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_SelectEvent" targetRef="Task_CheckAvailability" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_CheckAvailability" targetRef="Gateway_Availability" />
+    <bpmn:sequenceFlow id="Flow_NoTickets" name="Нет" sourceRef="Gateway_Availability" targetRef="End_NoTickets" />
+    <bpmn:sequenceFlow id="Flow_YesTickets" name="Да" sourceRef="Gateway_Availability" targetRef="Link_ToPayment" />
+    <bpmn:sequenceFlow id="Flow_ToPaymentMethod" sourceRef="Link_PaymentStart" targetRef="Task_SelectPayment" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Task_SelectPayment" targetRef="Task_ConfirmOrder" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="Task_ConfirmOrder" targetRef="Task_PaymentGateway" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Task_PaymentGateway" targetRef="Gateway_PaymentStatus" />
+    <bpmn:sequenceFlow id="Flow_PayFail" name="Нет" sourceRef="Gateway_PaymentStatus" targetRef="End_PaymentFailed" />
+    <bpmn:sequenceFlow id="Flow_PaySuccess" name="Да" sourceRef="Gateway_PaymentStatus" targetRef="Task_CreateOrder" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="Task_CreateOrder" targetRef="Gateway_Split" />
+    <bpmn:sequenceFlow id="Flow_ToUser" sourceRef="Gateway_Split" targetRef="Task_ReceiveUserEmail" />
+    <bpmn:sequenceFlow id="Flow_ToSeller" sourceRef="Gateway_Split" targetRef="Task_ReceiveSellerEmail" />
+    <bpmn:sequenceFlow id="Flow_UserDone" sourceRef="Task_ReceiveUserEmail" targetRef="Gateway_Join" />
+    <bpmn:sequenceFlow id="Flow_SellerDone" sourceRef="Task_ReceiveSellerEmail" targetRef="Gateway_Join" />
+    <bpmn:sequenceFlow id="Flow_Final" sourceRef="Gateway_Join" targetRef="End_Success" />
+    <bpmn:endEvent id="End_PaymentFailed" name="Ошибка оплаты">
+      <bpmn:incoming>Flow_PayFail</bpmn:incoming>
+      <bpmn:messageEventDefinition />
+    </bpmn:endEvent>
+    <bpmn:endEvent id="End_Success" name="Заказ завершен">
+      <bpmn:incoming>Flow_Final</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="Participant_1_di" bpmnElement="Participant_1" isHorizontal="true">
+        <dc:Bounds x="100" y="100" width="1350" height="600" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Seller_di" bpmnElement="Lane_Seller" isHorizontal="true">
+        <dc:Bounds x="130" y="500" width="1320" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_System_di" bpmnElement="Lane_System" isHorizontal="true">
+        <dc:Bounds x="130" y="300" width="1320" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Buyer_di" bpmnElement="Lane_Buyer" isHorizontal="true">
+        <dc:Bounds x="130" y="100" width="1320" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="180" y="180" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="185" y="223" width="29" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SelectEvent_di" bpmnElement="Task_SelectEvent">
+        <dc:Bounds x="270" y="158" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CheckAvailability_di" bpmnElement="Task_CheckAvailability">
+        <dc:Bounds x="270" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Availability_di" bpmnElement="Gateway_Availability" isMarkerVisible="true">
+        <dc:Bounds x="420" y="375" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="410" y="428" width="71" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_NoTickets_di" bpmnElement="End_NoTickets">
+        <dc:Bounds x="427" y="180" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="422" y="162" width="47" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Link_ToPayment_di" bpmnElement="Link_ToPayment">
+        <dc:Bounds x="520" y="382" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="515" y="425" width="46" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Link_PaymentStart_di" bpmnElement="Link_PaymentStart">
+        <dc:Bounds x="520" y="180" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="516" y="223" width="46" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SelectPayment_di" bpmnElement="Task_SelectPayment">
+        <dc:Bounds x="600" y="158" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ConfirmOrder_di" bpmnElement="Task_ConfirmOrder">
+        <dc:Bounds x="600" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_PaymentGateway_di" bpmnElement="Task_PaymentGateway">
+        <dc:Bounds x="730" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PaymentStatus_di" bpmnElement="Gateway_PaymentStatus" isMarkerVisible="true">
+        <dc:Bounds x="860" y="375" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="859" y="343" width="52" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CreateOrder_di" bpmnElement="Task_CreateOrder">
+        <dc:Bounds x="940" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Split_di" bpmnElement="Gateway_Split">
+        <dc:Bounds x="1070" y="375" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ReceiveUserEmail_di" bpmnElement="Task_ReceiveUserEmail">
+        <dc:Bounds x="1150" y="158" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ReceiveSellerEmail_di" bpmnElement="Task_ReceiveSellerEmail">
+        <dc:Bounds x="1150" y="560" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Join_di" bpmnElement="Gateway_Join">
+        <dc:Bounds x="1280" y="375" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_PaymentFailed_di" bpmnElement="End_PaymentFailed">
+        <dc:Bounds x="832" y="442" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="810" y="485" width="82" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Success_di" bpmnElement="End_Success">
+        <dc:Bounds x="1382" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1359" y="235" width="83" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="216" y="198" />
+        <di:waypoint x="270" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="320" y="238" />
+        <di:waypoint x="320" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="370" y="400" />
+        <di:waypoint x="420" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_NoTickets_di" bpmnElement="Flow_NoTickets">
+        <di:waypoint x="445" y="375" />
+        <di:waypoint x="445" y="216" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="450" y="323" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_YesTickets_di" bpmnElement="Flow_YesTickets">
+        <di:waypoint x="470" y="400" />
+        <di:waypoint x="520" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToPaymentMethod_di" bpmnElement="Flow_ToPaymentMethod">
+        <di:waypoint x="556" y="198" />
+        <di:waypoint x="600" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+        <di:waypoint x="650" y="238" />
+        <di:waypoint x="650" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="700" y="400" />
+        <di:waypoint x="730" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="830" y="400" />
+        <di:waypoint x="860" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PayFail_di" bpmnElement="Flow_PayFail">
+        <di:waypoint x="885" y="425" />
+        <di:waypoint x="885" y="460" />
+        <di:waypoint x="868" y="460" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="860" y="433" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PaySuccess_di" bpmnElement="Flow_PaySuccess">
+        <di:waypoint x="910" y="400" />
+        <di:waypoint x="940" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+        <di:waypoint x="1040" y="400" />
+        <di:waypoint x="1070" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToUser_di" bpmnElement="Flow_ToUser">
+        <di:waypoint x="1095" y="375" />
+        <di:waypoint x="1095" y="198" />
+        <di:waypoint x="1150" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToSeller_di" bpmnElement="Flow_ToSeller">
+        <di:waypoint x="1095" y="425" />
+        <di:waypoint x="1095" y="600" />
+        <di:waypoint x="1150" y="600" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_UserDone_di" bpmnElement="Flow_UserDone">
+        <di:waypoint x="1250" y="198" />
+        <di:waypoint x="1305" y="198" />
+        <di:waypoint x="1305" y="375" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SellerDone_di" bpmnElement="Flow_SellerDone">
+        <di:waypoint x="1250" y="600" />
+        <di:waypoint x="1305" y="600" />
+        <di:waypoint x="1305" y="425" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Final_di" bpmnElement="Flow_Final">
+        <di:waypoint x="1330" y="400" />
+        <di:waypoint x="1350" y="400" />
+        <di:waypoint x="1350" y="210" />
+        <di:waypoint x="1382" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

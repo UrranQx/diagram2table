@@ -1,0 +1,39 @@
+flowchart TB
+    subgraph "Clients"
+        WEB[Web-клиент<br/>React/TypeScript]
+        MOBILE[Мобильное приложение<br/>iOS/Android]
+        DESKTOP[Десктоп-приложение<br/>Electron]
+    end
+
+    subgraph "Backend Infrastructure"
+        API[Backend API<br/>Node.js/Express]
+        DB[(База данных<br/>PostgreSQL)]
+        CACHE[(Кэш<br/>Redis)]
+        STORAGE[Объектное хранилище<br/>S3-совместимое]
+        AUDIO[Сервис потокового аудио<br/>Go/FFmpeg]
+        MQ[Сервис очередей<br/>RabbitMQ]
+    end
+
+    subgraph "External Services"
+        PAYMENT[Платежный шлюз]
+        CDN_EX[CDN]
+        NOTIF_EX[Сервис нотификаций]
+    end
+
+    %% Связи клиентов
+    WEB -- "HTTPS/JSON" --> API
+    MOBILE -- "HTTPS/JSON" --> API
+    DESKTOP -- "HTTPS/JSON" --> API
+
+    %% Связи внутри бэкенда
+    API -- "SQL" --> DB
+    API -- "ключ-значение" --> CACHE
+    API -- "S3 API" --> STORAGE
+    API -- "gRPC" --> AUDIO
+    API -- "AMQP" --> MQ
+
+    %% Связи с внешними сервисами
+    API -- "REST API" --> PAYMENT
+    API -- "CDN API" --> CDN_EX
+    API -- "REST API" --> NOTIF_EX
+    AUDIO -- "Аудио потоки" --> CDN_EX

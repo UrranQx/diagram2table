@@ -1,0 +1,67 @@
+%%{init: {
+  'theme': 'neutral',
+  'themeVariables': {
+    'primaryColor': '#F9F9F9',
+    'primaryTextColor': '#000000',
+    'primaryBorderColor': '#333333',
+    'lineColor': '#333333',
+    'secondaryColor': '#F9F9F9',
+    'tertiaryColor': '#F9F9F9',
+    'mainBkg': '#ffffff',
+    'nodeBorder': '#333333',
+    'clusterBkg': '#ffffff',
+    'clusterBorder': '#000000',
+    'defaultLinkColor': '#333333',
+    'edgeLabelBackground': '#ffffff',
+    'fontFamily': 'sans-serif',
+    'fontSize': '13px'
+  }
+}}%%
+graph LR
+    classDef default fill:#F9F9F9,stroke:#333333,stroke-width:1px,color:black;
+    classDef systemNode fill:#fff,stroke:#000,stroke-width:2px;
+
+    subgraph Actors ["Акторы"]
+        direction TB
+        User[fa:fa-user Пользователь]
+        Guest[fa:fa-user-secret Гость]
+        Organizer[fa:fa-briefcase Организатор]
+        Venue[fa:fa-building Площадка]
+        Moderator[fa:fa-gavel Модератор]
+        Editor[fa:fa-newspaper Редакция Афиша Daily]
+        Controller[fa:fa-qrcode Контролер]
+        Admin[fa:fa-cogs Администратор]
+        Support[fa:fa-headset Техническая поддержка]
+        Analyst[fa:fa-chart-line Аналитик]
+    end
+
+    subgraph AfishaSystem ["Система 'Афиша'"]
+        Afisha((fa:fa-ticket-alt Афиша)):::systemNode
+    end
+
+    subgraph External ["Внешние сущности"]
+        direction TB
+        PaymentGateway[fa:fa-credit-card Платежный шлюз]
+        EmailService[fa:fa-envelope Email-сервис]
+        SMSService[fa:fa-comment-alt SMS-шлюз]
+        VenueAPI[fa:fa-server API площадок]
+        MonitoringSystem[fa:fa-heartbeat Система мониторинга]
+    end
+
+    User -- "Просматривает каталог" --> Afisha
+    User -- "Покупает билеты" --> Afisha
+    Guest -- "Ищет мероприятия" --> Afisha
+    Organizer -- "Управляет мероприятиями" --> Afisha
+    Venue -- "Загружает схемы залов" --> Afisha
+    Moderator -- "Модерирует мероприятия" --> Afisha
+    Editor -- "Добавляет материалы" --> Afisha
+    Controller -- "Верифицирует билеты" --> Afisha
+    Admin -- "Администрирует систему" --> Afisha
+    Support -- "Обрабатывает инциденты" --> Afisha
+    Analyst -- "Анализирует отчеты" --> Afisha
+
+    Afisha -- "Запрос на оплату" --> PaymentGateway
+    Afisha -- "Email-уведомления" --> EmailService
+    Afisha -- "SMS-уведомления" --> SMSService
+    Afisha -- "Афиша мероприятий" --> VenueAPI
+    Afisha -- "Метрики" --> MonitoringSystem

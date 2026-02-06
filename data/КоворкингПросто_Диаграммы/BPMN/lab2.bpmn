@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Defs_Coworking_Booking_v3" targetNamespace="http://example.com/coworking/booking/v3" exporter="Camunda Modeler" exporterVersion="5.40.1">
+  <collaboration id="Collab_Coworking">
+    <participant id="Participant_Coworking" name="Коворкинг (внутренний процесс)" processRef="Process_Coworking" />
+    <participant id="Participant_PSP" name="Платёжный провайдер" processRef="Process_PSP" />
+    <participant id="Participant_ACS" name="СКУД/Турникет" processRef="Process_ACS" />
+    <messageFlow id="MF_InitPayment" name="Создать платёж" sourceRef="Task_InitiatePayment" targetRef="Start_PSP" />
+    <messageFlow id="MF_PaymentResult" name="Результат оплаты" sourceRef="Event_PSP_Result" targetRef="Task_WaitPayment" />
+    <messageFlow id="MF_CreatePass" name="Запрос на создание пропуска" sourceRef="Task_SendCreatePass" targetRef="Start_ACS" />
+    <messageFlow id="MF_PassReady" name="QR/пропуск готов" sourceRef="Event_ACS_PassReady" targetRef="Event_PassReady" />
+  </collaboration>
+  <process id="Process_Coworking" name="Бронирование места клиентом (TO-BE)" isExecutable="true">
+    <laneSet id="LaneSet_Main">
+      <lane id="Lane_Admin" name="Администратор">
+        <flowNodeRef>Task_AdminReviewBookings</flowNodeRef>
+      </lane>
+      <lane id="Lane_System" name="Система бронирования">
+        <flowNodeRef>Gateway_PaymentOK</flowNodeRef>
+        <flowNodeRef>EndEvent_Success</flowNodeRef>
+        <flowNodeRef>Task_SendConfirmation</flowNodeRef>
+        <flowNodeRef>Event_PassReady</flowNodeRef>
+        <flowNodeRef>Task_SendCreatePass</flowNodeRef>
+        <flowNodeRef>Task_ConfirmBooking</flowNodeRef>
+        <flowNodeRef>Task_ViewAvailability</flowNodeRef>
+        <flowNodeRef>Task_CreateOrderHold</flowNodeRef>
+        <flowNodeRef>Gateway_Prepayment</flowNodeRef>
+        <flowNodeRef>Task_InitiatePayment</flowNodeRef>
+        <flowNodeRef>Task_WaitPayment</flowNodeRef>
+        <flowNodeRef>Timer_PaymentTimeout</flowNodeRef>
+      </lane>
+      <lane id="Lane_Client" name="Клиент">
+        <flowNodeRef>StartEvent_BookingNeed</flowNodeRef>
+        <flowNodeRef>Task_SelectDateTime</flowNodeRef>
+        <flowNodeRef>Task_SelectSeatTariff</flowNodeRef>
+        <flowNodeRef>EndEvent_Cancelled</flowNodeRef>
+        <flowNodeRef>Task_HandlePaymentFailure</flowNodeRef>
+        <flowNodeRef>Gateway_Cancel</flowNodeRef>
+      </lane>
+    </laneSet>
+    <startEvent id="StartEvent_BookingNeed" name="Нужна резервация" />
+    <task id="Task_SelectDateTime" name="Выбрать дату и время" />
+    <exclusiveGateway id="Gateway_PaymentOK" name="Оплата успешна?" />
+    <endEvent id="EndEvent_Success" name="Бронь подтверждена" />
+    <task id="Task_SendConfirmation" name="Отправить подтверждение и QR клиенту и админу" />
+    <task id="Task_AdminReviewBookings" name="Проверить новые брони (уведомление)" />
+    <intermediateCatchEvent id="Event_PassReady" name="Пропуск готов">
+      <messageEventDefinition />
+    </intermediateCatchEvent>
+    <task id="Task_SendCreatePass" name="Запрос на создание пропуска (QR) в СКУД" />
+    <task id="Task_ConfirmBooking" name="Подтвердить бронь" />
+    <task id="Task_ViewAvailability" name="Показать доступные места" />
+    <task id="Task_SelectSeatTariff" name="Выбрать место и тариф" />
+    <task id="Task_CreateOrderHold" name="Создать заказ и удержать слот" />
+    <exclusiveGateway id="Gateway_Prepayment" name="Требуется предоплата?" />
+    <endEvent id="EndEvent_Cancelled" name="Бронь отменена" />
+    <sequenceFlow id="F1" sourceRef="StartEvent_BookingNeed" targetRef="Task_SelectDateTime" />
+    <sequenceFlow id="F2" sourceRef="Task_SelectDateTime" targetRef="Task_ViewAvailability" />
+    <sequenceFlow id="F8" sourceRef="Task_WaitPayment" targetRef="Gateway_PaymentOK" />
+    <sequenceFlow id="F9_yes" name="Да" sourceRef="Gateway_PaymentOK" targetRef="Task_ConfirmBooking" />
+    <sequenceFlow id="F9_no" name="Нет" sourceRef="Gateway_PaymentOK" targetRef="Task_HandlePaymentFailure" />
+    <sequenceFlow id="F15" sourceRef="Task_SendConfirmation" targetRef="EndEvent_Success" />
+    <sequenceFlow id="F14" sourceRef="Event_PassReady" targetRef="Task_SendConfirmation" />
+    <sequenceFlow id="F16" sourceRef="Task_SendConfirmation" targetRef="Task_AdminReviewBookings" />
+    <sequenceFlow id="F13" sourceRef="Task_SendCreatePass" targetRef="Event_PassReady" />
+    <sequenceFlow id="F12" sourceRef="Task_ConfirmBooking" targetRef="Task_SendCreatePass" />
+    <sequenceFlow id="F6_no" name="Нет" sourceRef="Gateway_Prepayment" targetRef="Task_ConfirmBooking" />
+    <sequenceFlow id="F3" sourceRef="Task_ViewAvailability" targetRef="Task_SelectSeatTariff" />
+    <sequenceFlow id="F4" sourceRef="Task_SelectSeatTariff" targetRef="Task_CreateOrderHold" />
+    <sequenceFlow id="F5" sourceRef="Task_CreateOrderHold" targetRef="Gateway_Prepayment" />
+    <sequenceFlow id="F6_yes" name="Да" sourceRef="Gateway_Prepayment" targetRef="Task_InitiatePayment" />
+    <sequenceFlow id="F10" sourceRef="Timer_PaymentTimeout" targetRef="Task_HandlePaymentFailure" />
+    <sequenceFlow id="F7" sourceRef="Task_InitiatePayment" targetRef="Task_WaitPayment" />
+    <sequenceFlow id="Flow_1czh4ge" sourceRef="Task_InitiatePayment" targetRef="Task_HandlePaymentFailure" />
+    <sequenceFlow id="F17_ToCancelGw" sourceRef="Task_HandlePaymentFailure" targetRef="Gateway_Cancel" />
+    <sequenceFlow id="F11" name="Да" sourceRef="Gateway_Cancel" targetRef="EndEvent_Cancelled" />
+    <sequenceFlow id="F18_BackToInit" name="Нет (повторить)" sourceRef="Gateway_Cancel" targetRef="Task_InitiatePayment" />
+    <task id="Task_HandlePaymentFailure" name="Повторить оплату/изменить метод или отменить">
+      <incoming>Flow_1czh4ge</incoming>
+      <incoming>F10</incoming>
+    </task>
+    <exclusiveGateway id="Gateway_Cancel" name="Отменить?" default="F18_BackToInit" />
+    <task id="Task_InitiatePayment" name="Инициировать оплату (редирект на провайдера)">
+      <outgoing>Flow_1czh4ge</outgoing>
+    </task>
+    <receiveTask id="Task_WaitPayment" name="Ожидать результат оплаты (webhook)" />
+    <boundaryEvent id="Timer_PaymentTimeout" name="Тайм-аут оплаты 5 мин" attachedToRef="Task_WaitPayment">
+      <outgoing>F10</outgoing>
+      <timerEventDefinition id="TimerEventDefinition_0mm2n8v" />
+    </boundaryEvent>
+  </process>
+  <process id="Process_PSP" name="Провайдер платежей (black box)" isExecutable="false">
+    <sequenceFlow id="PSP_F1" sourceRef="Start_PSP" targetRef="Task_PSP_Process" />
+    <sequenceFlow id="PSP_F2" sourceRef="Task_PSP_Process" targetRef="Event_PSP_Result" />
+    <intermediateThrowEvent id="Event_PSP_Result" name="Сообщить результат">
+      <incoming>Flow_0rcj8fk</incoming>
+      <messageEventDefinition />
+    </intermediateThrowEvent>
+    <task id="Task_PSP_Process" name="Обработка/3DS">
+      <incoming>Flow_0db517j</incoming>
+      <outgoing>Flow_0rcj8fk</outgoing>
+    </task>
+    <startEvent id="Start_PSP" name="Получен запрос на платёж">
+      <outgoing>Flow_0db517j</outgoing>
+    </startEvent>
+    <sequenceFlow id="Flow_0rcj8fk" sourceRef="Task_PSP_Process" targetRef="Event_PSP_Result" />
+    <sequenceFlow id="Flow_0db517j" sourceRef="Start_PSP" targetRef="Task_PSP_Process" />
+  </process>
+  <process id="Process_ACS" name="СКУД (black box)" isExecutable="false">
+    <sequenceFlow id="ACS_F1" sourceRef="Start_ACS" targetRef="Task_ACS_CreatePass" />
+    <sequenceFlow id="ACS_F2" sourceRef="Task_ACS_CreatePass" targetRef="Event_ACS_PassReady" />
+    <task id="Task_ACS_CreatePass" name="Создать/активировать пропуск">
+      <incoming>Flow_1oc20h1</incoming>
+      <outgoing>Flow_043316g</outgoing>
+    </task>
+    <intermediateThrowEvent id="Event_ACS_PassReady" name="Подтвердить создание">
+      <incoming>Flow_043316g</incoming>
+      <messageEventDefinition />
+    </intermediateThrowEvent>
+    <startEvent id="Start_ACS" name="Запрос на пропуск">
+      <outgoing>Flow_1oc20h1</outgoing>
+    </startEvent>
+    <sequenceFlow id="Flow_1oc20h1" sourceRef="Start_ACS" targetRef="Task_ACS_CreatePass" />
+    <sequenceFlow id="Flow_043316g" sourceRef="Task_ACS_CreatePass" targetRef="Event_ACS_PassReady" />
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Coworking_v3">
+    <bpmndi:BPMNPlane id="BPMNPlane_Coworking_v3" bpmnElement="Collab_Coworking">
+      <bpmndi:BPMNShape id="Shape_Participant_Coworking" bpmnElement="Participant_Coworking" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="2600" height="600" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Client" bpmnElement="Lane_Client" isHorizontal="true">
+        <dc:Bounds x="200" y="80" width="2560" height="206" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_System" bpmnElement="Lane_System" isHorizontal="true">
+        <dc:Bounds x="200" y="286" width="2560" height="254" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Admin" bpmnElement="Lane_Admin" isHorizontal="true">
+        <dc:Bounds x="200" y="540" width="2560" height="140" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_BookingNeed">
+        <dc:Bounds x="240" y="182" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="228" y="218" width="60" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_SelectDateTime" bpmnElement="Task_SelectDateTime">
+        <dc:Bounds x="305" y="172" width="150" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_PaymentOK" bpmnElement="Gateway_PaymentOK" isMarkerVisible="true">
+        <dc:Bounds x="1600" y="375" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1600" y="435" width="50" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndSuccess" bpmnElement="EndEvent_Success">
+        <dc:Bounds x="2652" y="400" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2633" y="436" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_SendConfirmation" bpmnElement="Task_SendConfirmation">
+        <dc:Bounds x="2340" y="390" width="240" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_AdminReview" bpmnElement="Task_AdminReviewBookings">
+        <dc:Bounds x="2340" y="602" width="240" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EventPassReady" bpmnElement="Event_PassReady">
+        <dc:Bounds x="2252" y="342" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2170" y="353" width="72" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_SendCreatePass" bpmnElement="Task_SendCreatePass">
+        <dc:Bounds x="1900" y="362" width="220" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ConfirmBooking" bpmnElement="Task_ConfirmBooking">
+        <dc:Bounds x="1720" y="472" width="200" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ViewAvailability" bpmnElement="Task_ViewAvailability">
+        <dc:Bounds x="330" y="390" width="200" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_SelectSeatTariff" bpmnElement="Task_SelectSeatTariff">
+        <dc:Bounds x="530" y="172" width="180" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_CreateOrderHold" bpmnElement="Task_CreateOrderHold">
+        <dc:Bounds x="610" y="392" width="200" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Prepayment" bpmnElement="Gateway_Prepayment" isMarkerVisible="true">
+        <dc:Bounds x="885" y="382" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="877" y="432" width="67" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndCancelled" bpmnElement="EndEvent_Cancelled">
+        <dc:Bounds x="2652" y="162" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2628" y="198" width="84" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_HandlePaymentFailure" bpmnElement="Task_HandlePaymentFailure">
+        <dc:Bounds x="1070" y="142" width="200" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Cancel" bpmnElement="Gateway_Cancel" isMarkerVisible="true">
+        <dc:Bounds x="1455" y="155" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1451" y="215" width="57" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_InitiatePayment" bpmnElement="Task_InitiatePayment">
+        <dc:Bounds x="1020" y="332" width="220" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_WaitPayment" bpmnElement="Task_WaitPayment">
+        <dc:Bounds x="1330" y="322" width="220" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0rn90w7_di" bpmnElement="Timer_PaymentTimeout">
+        <dc:Bounds x="1362" y="304" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1396" y="295.5" width="87" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F1" bpmnElement="F1">
+        <di:waypoint x="276" y="200" />
+        <di:waypoint x="305" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F2" bpmnElement="F2">
+        <di:waypoint x="455" y="218" />
+        <di:waypoint x="455" y="309" />
+        <di:waypoint x="330" y="309" />
+        <di:waypoint x="330" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F8" bpmnElement="F8">
+        <di:waypoint x="1440" y="378" />
+        <di:waypoint x="1440" y="402" />
+        <di:waypoint x="1602" y="402" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F9_yes" bpmnElement="F9_yes">
+        <di:waypoint x="1650" y="400" />
+        <di:waypoint x="1720" y="400" />
+        <di:waypoint x="1720" y="482" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1723" y="439" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F9_no" bpmnElement="F9_no">
+        <di:waypoint x="1625" y="375" />
+        <di:waypoint x="1625" y="260" />
+        <di:waypoint x="1210" y="260" />
+        <di:waypoint x="1210" y="200" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1600" y="292" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F15" bpmnElement="F15">
+        <di:waypoint x="2580" y="418" />
+        <di:waypoint x="2652" y="418" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F14" bpmnElement="F14">
+        <di:waypoint x="2287" y="365" />
+        <di:waypoint x="2320" y="365" />
+        <di:waypoint x="2340" y="418" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F16" bpmnElement="F16">
+        <di:waypoint x="2460" y="446" />
+        <di:waypoint x="2460" y="602" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F13" bpmnElement="F13">
+        <di:waypoint x="2120" y="372" />
+        <di:waypoint x="2120" y="312" />
+        <di:waypoint x="2270" y="312" />
+        <di:waypoint x="2270" y="342" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F12" bpmnElement="F12">
+        <di:waypoint x="1820" y="472" />
+        <di:waypoint x="1820" y="390" />
+        <di:waypoint x="1900" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F6_no" bpmnElement="F6_no">
+        <di:waypoint x="932" y="410" />
+        <di:waypoint x="980" y="499" />
+        <di:waypoint x="1720" y="499" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="962" y="439" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F3" bpmnElement="F3">
+        <di:waypoint x="530" y="400" />
+        <di:waypoint x="530" y="218" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F4" bpmnElement="F4">
+        <di:waypoint x="710" y="218" />
+        <di:waypoint x="710" y="310" />
+        <di:waypoint x="610" y="310" />
+        <di:waypoint x="610" y="402" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F5" bpmnElement="F5">
+        <di:waypoint x="810" y="410" />
+        <di:waypoint x="888" y="410" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F6_yes" bpmnElement="F6_yes">
+        <di:waypoint x="935" y="407" />
+        <di:waypoint x="998" y="407" />
+        <di:waypoint x="998" y="360" />
+        <di:waypoint x="1020" y="360" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="973" y="363" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F10" bpmnElement="F10">
+        <di:waypoint x="1362" y="323" />
+        <di:waypoint x="1160" y="323" />
+        <di:waypoint x="1160" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F7" bpmnElement="F7">
+        <di:waypoint x="1240" y="350" />
+        <di:waypoint x="1330" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1czh4ge_di" bpmnElement="Flow_1czh4ge">
+        <di:waypoint x="1130" y="332" />
+        <di:waypoint x="1130" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F17_ToCancelGw" bpmnElement="F17_ToCancelGw">
+        <di:waypoint x="1270" y="180" />
+        <di:waypoint x="1458" y="183" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F11" bpmnElement="F11">
+        <di:waypoint x="1505" y="180" />
+        <di:waypoint x="2652" y="180" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1515" y="166" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F18_BackToInit" bpmnElement="F18_BackToInit">
+        <di:waypoint x="1480" y="155" />
+        <di:waypoint x="1480" y="100" />
+        <di:waypoint x="1040" y="100" />
+        <di:waypoint x="1040" y="330" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1380" y="113" width="82" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Participant_PSP" bpmnElement="Participant_PSP" isHorizontal="true">
+        <dc:Bounds x="160" y="700" width="2600" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Event_PSP_Result" bpmnElement="Event_PSP_Result">
+        <dc:Bounds x="1492" y="742" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1483" y="778" width="54" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_PSP_Process" bpmnElement="Task_PSP_Process">
+        <dc:Bounds x="1270" y="732" width="200" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Start_PSP" bpmnElement="Start_PSP">
+        <dc:Bounds x="1212" y="742" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1189" y="778" width="83" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0rcj8fk_di" bpmnElement="Flow_0rcj8fk">
+        <di:waypoint x="1470" y="760" />
+        <di:waypoint x="1492" y="760" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0db517j_di" bpmnElement="Flow_0db517j">
+        <di:waypoint x="1248" y="760" />
+        <di:waypoint x="1270" y="760" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Participant_ACS" bpmnElement="Participant_ACS" isHorizontal="true">
+        <dc:Bounds x="160" y="880" width="2600" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_ACS_CreatePass" bpmnElement="Task_ACS_CreatePass">
+        <dc:Bounds x="2010" y="920" width="200" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Event_ACS_PassReady" bpmnElement="Event_ACS_PassReady">
+        <dc:Bounds x="2252" y="930" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2237" y="966" width="67" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Start_ACS" bpmnElement="Start_ACS">
+        <dc:Bounds x="1942" y="930" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1934" y="966" width="52" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1oc20h1_di" bpmnElement="Flow_1oc20h1">
+        <di:waypoint x="1978" y="948" />
+        <di:waypoint x="2010" y="948" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_043316g_di" bpmnElement="Flow_043316g">
+        <di:waypoint x="2210" y="948" />
+        <di:waypoint x="2252" y="948" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_InitPayment" bpmnElement="MF_InitPayment">
+        <di:waypoint x="1230" y="388" />
+        <di:waypoint x="1230" y="742" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1188" y="513" width="83" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_PaymentResult" bpmnElement="MF_PaymentResult">
+        <di:waypoint x="1510" y="742" />
+        <di:waypoint x="1510" y="378" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1484" y="506" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_CreatePass" bpmnElement="MF_CreatePass">
+        <di:waypoint x="1960" y="418" />
+        <di:waypoint x="1960" y="930" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1934" y="615" width="52" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_PassReady" bpmnElement="MF_PassReady">
+        <di:waypoint x="2270" y="930" />
+        <di:waypoint x="2270" y="378" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2222" y="628" width="90" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

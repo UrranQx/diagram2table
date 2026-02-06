@@ -1,0 +1,61 @@
+@startuml uc3
+left to right direction
+
+title Управление мероприятиями (для организаторов)
+
+actor "Организатор" as Organizer
+actor "Площадка" as Venue
+actor "Система модерации" as ModerationSystem
+
+rectangle "Личный кабинет организатора" as OrganizerRect {
+  usecase "Создание нового мероприятия" as UC1
+  usecase "Редактирование мероприятия" as UC2
+  usecase "Удаление мероприятия" as UC3
+  
+  usecase "Настройка цен и квот" as UC5
+  usecase "Просмотр статистики продаж" as UC7
+  usecase "Генерация отчетов" as UC8
+  usecase "Настройка промокодов" as UC9
+  usecase "Просмотр деталей мероприятия" as UC10
+  
+  UC1 -.> UC5 : include
+  UC7 -.> UC8 : include
+  UC2 -u.> UC10 : extend
+  UC3 -u.> UC10 : extend
+  UC10 -.> UC7 : include
+
+  UC7 -[hidden]r-> UC2
+}
+
+rectangle "Личный кабинет площадки" as VenueRect {
+  usecase "Загрузка схемы зала" as UC4
+  usecase "Управление доступностью мест" as UC6
+
+  UC4 -.> UC1 : extend
+}
+
+rectangle "Модерация" as ModerationRect {
+  usecase "Отправка на модерацию" as UC12
+  usecase "Получение статуса модерации" as UC13
+  usecase "Исправление замечаний" as UC14
+  
+  UC12 .> UC1 : include
+  UC13 .> UC12 : extend
+  UC14 .> UC13 : extend
+}
+
+Organizer --> UC1
+Organizer --> UC9
+Organizer --> UC10
+Organizer --> UC14
+Venue -u-> UC4
+Venue -u-> UC6
+Venue -u-> UC1
+ModerationSystem --> UC12
+ModerationSystem --> UC13
+
+OrganizerRect .[hidden]d-> ModerationRect
+OrganizerRect .[hidden]d-> VenueRect
+ModerationRect .[hidden]d-> VenueRect
+
+@enduml

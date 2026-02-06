@@ -1,0 +1,97 @@
+@startuml
+title Диаграмма классов системы "Просто"
+
+skinparam classAttributeIconSize 0
+
+class User {
+  +id: UUID
+  +fullName: string
+  +email: string
+  +passwordHash: string
+  +role: string  ' client / admin / accountant
+
+  +register()
+  +authenticate(password)
+  +updateProfile()
+}
+
+class CoworkingLocation {
+  +id: UUID
+  +name: string
+  +address: string
+  +timezone: string
+  +isActive: bool
+
+  +activate()
+  +deactivate()
+}
+
+class Workspace {
+  +id: UUID
+  +name: string
+  +type: string   ' desk / meeting_room / office
+  +location: string
+  +capacity: int
+  +isActive: bool
+
+  +markAsActive()
+  +markAsInactive()
+}
+
+class TariffPlan {
+  +id: UUID
+  +name: string
+  +description: string
+  +pricePerHour: decimal
+  +cancellationPolicy: string
+
+  +calculatePrice(duration)
+}
+
+class Booking {
+  +id: UUID
+  +startTime: datetime
+  +endTime: datetime
+  +status: string     ' created / pending_payment / confirmed / cancelled
+  +totalPrice: decimal
+
+  +calculateTotalPrice()
+  +cancel()
+  +markAsConfirmed()
+}
+
+class Payment {
+  +id: UUID
+  +amount: decimal
+  +status: string   ' pending / success / failed
+  +provider: string
+  +transactionId: string
+  +createdAt: datetime
+
+  +markSuccess()
+  +markFailed()
+}
+
+class AccessPass {
+  +id: UUID
+  +qrCode: string
+  +validFrom: datetime
+  +validUntil: datetime
+  +status: string   ' active / revoked / expired
+
+  +activate()
+  +revoke()
+  +isValid()
+}
+
+' --- Ассоциации ---
+
+User "1" -- "0..*" Booking : делает >
+CoworkingLocation "1" -- "1..*" Workspace : содержит >
+Workspace "1" -- "0..*" Booking : резервируется >
+TariffPlan "1" -- "0..*" Booking : бронируется по >
+
+Booking "1" -- "0..1" Payment : оплачивается >
+Booking "1" -- "0..1" AccessPass : выдаёт >
+
+@enduml

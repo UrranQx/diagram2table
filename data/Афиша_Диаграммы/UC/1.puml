@@ -1,0 +1,47 @@
+@startuml uc1
+left to right direction
+
+title Просмотр каталога мероприятий
+
+actor "Пользователь" as User
+actor "Гость" as Guest
+
+rectangle "Каталог мероприятий" {
+  usecase "Просмотр главной страницы" as UC1
+  usecase "Поиск мероприятий" as UC2
+  usecase "Фильтрация мероприятий" as UC3
+  usecase "Сортировка мероприятий" as UC4
+  usecase "Просмотр деталей мероприятия" as UC5
+  usecase "Просмотр схемы зала/мест" as UC6
+  usecase "Просмотр отзывов и рейтингов" as UC7
+  usecase "Добавление в избранное" as UC8
+  usecase "Поделиться мероприятием" as UC10
+  
+  UC2 -u.> UC1 : extend
+  UC2 -.> UC3 : include
+  UC2 -.> UC4 : include
+  UC5 -.> UC6 : include
+  UC5 -.> UC7 : include
+  
+  UC10 -r.> UC5 : extend
+
+  UC8 -r.> UC5 : extend
+}
+
+User --> UC1
+User --> UC5
+User --> UC8
+Guest --> UC1
+Guest --> UC5
+
+note right of UC2
+  Поиск по названию, дате,
+  категории, месту проведения
+end note
+
+note right of UC3
+  Фильтры: цена, дата,
+  категория, возрастное ограничение
+end note
+
+@enduml

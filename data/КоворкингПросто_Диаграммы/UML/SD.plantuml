@@ -1,0 +1,35 @@
+@startuml
+title Диаграмма последовательности: "Бронирование рабочего места с онлайн-оплатой"
+
+actor Клиент as Client
+participant "Web-клиент\n(браузер)" as Web
+participant "BookingController" as BookCtrl
+participant "BookingService" as BookSvc
+participant "PaymentService" as PaySvc
+participant "PaymentGateway\n(платёжный провайдер)" as PSP
+participant "NotificationService" as NotifSvc
+
+Client -> Web : Открыть страницу бронирования
+Client -> Web : Выбрать дату, время,\nрабочее место и тариф
+Web -> BookCtrl : POST /bookings\n(данные брони)
+BookCtrl -> BookSvc : createBooking(data)
+BookSvc -> BookSvc : проверить доступность\nместа и лимиты
+BookSvc -> BookSvc : создать запись бронирования
+BookSvc --> BookCtrl : bookingId, статус "Ожидает оплаты"
+BookCtrl --> Web : Ответ с данными брони
+
+Client -> Web : Нажать "Оплатить онлайн"
+Web -> BookCtrl : POST /bookings/{id}/pay
+BookCtrl -> PaySvc : initPayment(bookingId)
+PaySvc -> PSP : создать платёж
+PSP --> PaySvc : статус платежа (успех)
+PaySvc -> BookSvc : markBookingAsPaid(bookingId)
+BookSvc --> PaySvc : ок
+PaySvc -> NotifSvc : sendPaymentSuccess(user, booking)
+NotifSvc --> PaySvc : ок
+PaySvc --> BookCtrl : оплата успешна
+BookCtrl --> Web : Ответ "Оплата успешна,\nбронь подтверждена"
+
+Web --> Client : Показать подтверждение\nи детали бронирования
+
+@enduml

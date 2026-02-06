@@ -1,0 +1,60 @@
+@startuml uc2
+left to right direction
+
+title Покупка билетов
+
+actor "Пользователь" as User
+actor "Платежная система" as PaymentSystem
+actor "Система рассылки" as NotificationSystem
+actor "Контролер" as Organizer
+
+rectangle "Процесс покупки билетов" {
+  usecase "Выбор места/временного слота" as UC1
+  usecase "Добавление билетов в корзину" as UC2
+  usecase "Просмотр корзины" as UC3
+  usecase "Ввод личных данных" as UC4
+  usecase "Выбор способа оплаты" as UC5
+  usecase "Оплата заказа" as UC6
+  usecase "Подтверждение оплаты" as UC7
+  usecase "Формирование билетов с QR-кодом" as UC8
+  usecase "Отправка билетов пользователю" as UC9
+  usecase "Отмена заказа" as UC10
+  usecase "Возврат билетов" as UC11
+  usecase "Проверка доступности мест" as UC12
+
+  UC1 -.> UC12 : include
+  
+  UC3 -.> UC2 : include
+  UC1 -.> UC2 : extend
+  UC6 -.> UC5 : include
+  UC6 -.> UC4 : include
+  UC7 -.> UC6 : include
+  UC8 -l.> UC7 : include
+  UC9 -.> UC8 : include
+  UC10 -.> UC3 : extend
+  UC11 --.> UC9 : extend
+}
+
+rectangle "Верификация на входе" {
+  usecase "Сканирование QR-кода" as UC13
+  usecase "Проверка валидности билета" as UC14
+  usecase "Отметка о посещении" as UC15
+  
+  UC13 .> UC14 : include
+  UC14 .> UC15 : include
+}
+
+User -> UC1
+User -> UC3
+User -> UC4
+User -> UC5
+User -> UC10
+User -> UC11
+PaymentSystem -l-> UC6
+PaymentSystem -l-> UC7
+NotificationSystem -u-> UC9
+Organizer --> UC13
+
+UC10 -[hidden]r-> UC11
+
+@enduml

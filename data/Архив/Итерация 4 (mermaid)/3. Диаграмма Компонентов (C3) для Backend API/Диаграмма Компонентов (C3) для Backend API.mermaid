@@ -1,0 +1,54 @@
+flowchart TB
+    subgraph "Backend API Container"
+        subgraph "Controllers Layer"
+            UC[UserController]
+            PC[PlaylistController]
+            SC[SubscriptionController]
+            PLC[PlayerController]
+            RC[RecommendationController]
+            CC[ContentController]
+        end
+
+        subgraph "Services Layer"
+            US[UserService]
+            SS[SubscriptionService]
+            PS[PlaybackService]
+            CS[ContentService]
+            NS[NotificationService]
+            GS[GeoService]
+        end
+
+        subgraph "Repositories Layer"
+            UR[UserRepository]
+            PR[PlaylistRepository]
+            SR[SubscriptionRepository]
+            CR[ContentRepository]
+        end
+
+        subgraph "External Adapters"
+            PGA[PaymentGatewayAdapter]
+            EA[EmailAdapter]
+            CDNA[CDNAdapter]
+        end
+    end
+
+    %% Зависимости контроллеров
+    UC --> US
+    PC --> CS
+    SC --> SS
+    PLC --> PS
+    RC --> CS
+    CC --> CS
+
+    %% Зависимости сервисов
+    US --> UR
+    SS --> SR & PGA
+    PS --> CR & CDNA
+    CS --> CR
+    NS --> EA
+    GS --> CR
+
+    %% Внешние зависимости
+    PGA --> External[Внешний платежный шлюз]
+    EA --> External2[Сервис нотификаций]
+    CDNA --> External3[CDN]

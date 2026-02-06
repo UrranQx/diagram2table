@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-01-15T10:00:00.000Z" agent="Mozilla/5.0" version="22.1.0" etag="alert-processing-sequence">
+  <diagram name="Автоматическая обработка алертов" id="alert-sequence">
+    <mxGraphModel dx="1834" dy="1036" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="2000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- ============== ЗАГОЛОВОК ============== -->
+        <mxCell id="title" value="&lt;b&gt;Диаграмма последовательностей: Автоматическая обработка алертов&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="400" y="10" width="500" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- ============== УЧАСТНИКИ (АКТОРЫ) ============== -->
+        
+        <!-- Система мониторинга -->
+        <mxCell id="actor_monitoring" value="&lt;b&gt;Система&lt;br&gt;мониторинга&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Внутренний мессенджер -->
+        <mxCell id="actor_messenger" value="&lt;b&gt;Внутренний&lt;br&gt;мессенджер&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="200" y="60" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Инструмент обработки -->
+        <mxCell id="actor_tool" value="&lt;b&gt;Инструмент&lt;br&gt;обработки алертов&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="360" y="60" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Jira -->
+        <mxCell id="actor_jira" value="&lt;b&gt;Jira&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="540" y="60" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Pipeline -->
+        <mxCell id="actor_pipeline" value="&lt;b&gt;Pipeline&lt;br&gt;(автоматизация)&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="700" y="60" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Журнал аудита -->
+        <mxCell id="actor_audit" value="&lt;b&gt;Журнал&lt;br&gt;аудита&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="860" y="60" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Счетчики/Метрики -->
+        <mxCell id="actor_metrics" value="&lt;b&gt;Счетчики&lt;br&gt;метрик&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="60" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- SRE-инженер -->
+        <mxCell id="actor_sre" value="&lt;b&gt;SRE-инженер&lt;/b&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="50" width="40" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Команда эскалации -->
+        <mxCell id="actor_escalation" value="&lt;b&gt;Команда&lt;br&gt;эскалации&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="60" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- ============== LIFELINES (Линии жизни) ============== -->
+        
+        <mxCell id="lifeline_monitoring" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 4;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="90" y="110" as="sourcePoint" />
+            <mxPoint x="90" y="1800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="lifeline_messenger" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 4;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="250" y="110" as="sourcePoint" />
+            <mxPoint x="250" y="1800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="lifeline_tool" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 4;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="110" as="sourcePoint" />
+            <mxPoint x="420" y="1800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="lifeline_jira" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 4;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="110" as="sourcePoint" />
+            <mxPoint x="590" y="1800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="lifeline_pipeline" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 4;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="750" y="110" as="sourcePoint" />
+            <mxPoint x="750" y="1800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="lifeline_audit" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 4;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="910" y="110" as="sourcePoint" />
+            <mxPoint x="910" y="1800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="lifeline_metrics" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 4;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1070" y="110" as="sourcePoint" />
+            <mxPoint x="1070" y="1800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="lifeline_sre" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 4;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1210" y="110" as="sourcePoint" />
+            <mxPoint x="1210" y="1800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="lifeline_escalation" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 4;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1350" y="110" as="sourcePoint" />
+            <mxPoint x="1350" y="1800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- ============== ОСНОВНОЙ СЦЕНАРИЙ ============== -->
+        
+        <mxCell id="main_label" value="&lt;b&gt;ОСНОВНОЙ СЦЕНАРИЙ&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=#d5e8d4;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="10" y="130" width="180" height="25" as="geometry" />
+        </mxCell>
+        
+        <!-- Шаг 1: Отправка алерта -->
+        <mxCell id="msg1" value="1. Отправка сообщения об алерте&#xa;(источник, сообщение, метаданные)" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2D7600;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="90" y="180" as="sourcePoint" />
+            <mxPoint x="250" y="180" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Шаг 2: Получение и проверка -->
+        <mxCell id="msg2" value="2. Получение сообщения об алерте" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2D7600;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="250" y="220" as="sourcePoint" />
+            <mxPoint x="420" y="220" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Активация инструмента -->
+        <mxCell id="activation_tool_1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="415" y="220" width="10" height="400" as="geometry" />
+        </mxCell>
+        
+        <!-- Проверка сценария (self-call) -->
+        <mxCell id="msg2a" value="Проверка наличия сценария&#xa;для алерта" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#2D7600;fontSize=9;curved=1;" edge="1" parent="1">
+          <mxGeometry x="0.2" y="20" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="425" y="250" as="sourcePoint" />
+            <mxPoint x="425" y="280" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="470" y="250" />
+              <mxPoint x="470" y="280" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Шаг 3: Создание задачи -->
+        <mxCell id="msg3" value="3. Создание задачи на устранение проблемы" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2D7600;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="310" as="sourcePoint" />
+            <mxPoint x="590" y="310" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Ответ от Jira -->
+        <mxCell id="msg3a" value="Task ID" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#2D7600;fontSize=9;dashed=1;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="340" as="sourcePoint" />
+            <mxPoint x="420" y="340" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Шаг 4: Проверка эскалации и запуск пайплайна -->
+        <mxCell id="msg4" value="Определение: эскалация не требуется" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#2D7600;fontSize=9;curved=1;" edge="1" parent="1">
+          <mxGeometry x="0.2" y="20" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="425" y="360" as="sourcePoint" />
+            <mxPoint x="425" y="390" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="470" y="360" />
+              <mxPoint x="470" y="390" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="msg4a" value="4. Запуск пайплайна устранения проблемы" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2D7600;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="420" as="sourcePoint" />
+            <mxPoint x="750" y="420" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Активация Pipeline -->
+        <mxCell id="activation_pipeline" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="745" y="420" width="10" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Успешное выполнение -->
+        <mxCell id="msg4b" value="Успешное выполнение" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#2D7600;fontSize=9;dashed=1;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="750" y="470" as="sourcePoint" />
+            <mxPoint x="420" y="470" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Шаг 5: Закрытие задачи -->
+        <mxCell id="msg5" value="5. Закрытие задачи (статус: Закрыт, label: Система)" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2D7600;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="510" as="sourcePoint" />
+            <mxPoint x="590" y="510" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Шаг 6: Запись в аудит -->
+        <mxCell id="msg6" value="6. Запись в журнал аудита&#xa;(правило, автоматическое закрытие)" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2D7600;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="560" as="sourcePoint" />
+            <mxPoint x="910" y="560" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Шаг 7: Обновление счетчиков -->
+        <mxCell id="msg7" value="7. Обновление счетчиков&#xa;(+1 автообработанный алерт)" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2D7600;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="610" as="sourcePoint" />
+            <mxPoint x="1070" y="610" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- ============== АЛЬТЕРНАТИВНЫЙ СЦЕНАРИЙ 2.a ============== -->
+        
+        <mxCell id="alt_frame_2a" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#d79b00;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="680" width="1200" height="150" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="alt_label_2a" value="&lt;b&gt;alt&lt;/b&gt; [2.a] Сценарий обработки отсутствует" style="text;html=1;strokeColor=none;fillColor=#fff2cc;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="30" y="680" width="280" height="25" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="msg_alt_2a_1" value="Определение: сценарий отсутствует" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#D79B00;fontSize=9;curved=1;" edge="1" parent="1">
+          <mxGeometry x="0.2" y="20" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="425" y="720" as="sourcePoint" />
+            <mxPoint x="425" y="750" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="470" y="720" />
+              <mxPoint x="470" y="750" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="msg_alt_2a_2" value="Уведомление о необходимости&#xa;вмешательства для обработки алерта" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#D79B00;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="790" as="sourcePoint" />
+            <mxPoint x="1210" y="790" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- ============== АЛЬТЕРНАТИВНЫЙ СЦЕНАРИЙ 4.a ============== -->
+        
+        <mxCell id="alt_frame_4a" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#d79b00;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="860" width="1200" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="alt_label_4a" value="&lt;b&gt;alt&lt;/b&gt; [4.a] Требуется вмешательство SRE" style="text;html=1;strokeColor=none;fillColor=#fff2cc;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="30" y="860" width="280" height="25" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="msg_alt_4a" value="Уведомление о необходимости&#xa;вмешательства для обработки алерта" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#D79B00;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="920" as="sourcePoint" />
+            <mxPoint x="1210" y="920" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- ============== АЛЬТЕРНАТИВНЫЙ СЦЕНАРИЙ 4.b (ЭСКАЛАЦИЯ) ============== -->
+        
+        <mxCell id="alt_frame_4b" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#6c8ebf;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1010" width="1400" height="350" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="alt_label_4b" value="&lt;b&gt;alt&lt;/b&gt; [4.b] Требуется эскалация" style="text;html=1;strokeColor=none;fillColor=#dae8fc;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1010" width="200" height="25" as="geometry" />
+        </mxCell>
+        
+        <!-- Активация инструмента для эскалации -->
+        <mxCell id="activation_tool_esc" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="415" y="1050" width="10" height="290" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="msg_esc_1" value="4.b.4 Определение: требуется эскалация" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#6C8EBF;fontSize=9;curved=1;" edge="1" parent="1">
+          <mxGeometry x="0.2" y="20" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="425" y="1060" as="sourcePoint" />
+            <mxPoint x="425" y="1090" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="470" y="1060" />
+              <mxPoint x="470" y="1090" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="msg_esc_2" value="4.b.5 Создание запроса в канале эскалации&#xa;(с данными об алерте)" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#6C8EBF;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="1120" as="sourcePoint" />
+            <mxPoint x="1350" y="1120" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Активация команды эскалации -->
+        <mxCell id="activation_escalation" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="1345" y="1120" width="10" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="msg_esc_3" value="5.b.6 Ожидание закрытия запроса..." style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#6C8EBF;fontSize=9;dashed=1;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1350" y="1190" as="sourcePoint" />
+            <mxPoint x="420" y="1190" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="msg_esc_4" value="5.b.7 Закрытие задачи" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#6C8EBF;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="1230" as="sourcePoint" />
+            <mxPoint x="590" y="1230" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="msg_esc_5" value="6.b.8 Запись в журнал аудита" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#6C8EBF;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="1270" as="sourcePoint" />
+            <mxPoint x="910" y="1270" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="msg_esc_6" value="7.b.9 Обновление счетчиков" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#6C8EBF;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="1310" as="sourcePoint" />
+            <mxPoint x="1070" y="1310" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- ============== ИСКЛЮЧЕНИЕ E1 ============== -->
+        
+        <mxCell id="exc_frame_e1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#b85450;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1400" width="1200" height="150" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="exc_label_e1" value="&lt;b&gt;break&lt;/b&gt; [E1] Некорректный формат входящего алерта" style="text;html=1;strokeColor=none;fillColor=#f8cecc;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1400" width="320" height="25" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="msg_e1_1" value="Невозможно разобрать данные алерта" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#B85450;fontSize=9;curved=1;" edge="1" parent="1">
+          <mxGeometry x="0.2" y="20" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="425" y="1440" as="sourcePoint" />
+            <mxPoint x="425" y="1470" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="470" y="1440" />
+              <mxPoint x="470" y="1470" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="msg_e1_2" value="Логирование ошибки" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#B85450;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="1490" as="sourcePoint" />
+            <mxPoint x="910" y="1490" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="msg_e1_3" value="Уведомление администраторам&#xa;об инциденте в интеграции" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#B85450;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="1530" as="sourcePoint" />
+            <mxPoint x="1210" y="1530" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- ============== ИСКЛЮЧЕНИЕ E2 ============== -->
+        
+        <mxCell id="exc_frame_e2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#b85450;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1580" width="1200" height="150" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="exc_label_e2" value="&lt;b&gt;break&lt;/b&gt; [E2] Сбой выполнения автоматического сценария" style="text;html=1;strokeColor=none;fillColor=#f8cecc;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1580" width="350" height="25" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="msg_e2_1" value="Сценарий завершился с ошибкой" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#B85450;fontSize=9;dashed=1;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="-10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="750" y="1640" as="sourcePoint" />
+            <mxPoint x="420" y="1640" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="msg_e2_2" value="Эскалация на SRE-инженера&#xa;с логом неудачного выполнения" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#B85450;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="-0.1" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="1690" as="sourcePoint" />
+            <mxPoint x="1210" y="1690" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- ============== ЛЕГЕНДА ============== -->
+        
+        <mxCell id="legend_frame" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="60" width="200" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend_title" value="&lt;b&gt;ЛЕГЕНДА&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="65" width="200" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend_main" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2D7600;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1460" y="105" as="sourcePoint" />
+            <mxPoint x="1530" y="105" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend_main_text" value="Основной сценарий" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="95" width="110" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend_alt" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#D79B00;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1460" y="135" as="sourcePoint" />
+            <mxPoint x="1530" y="135" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend_alt_text" value="Альтернативный (SRE)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="125" width="110" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend_esc" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#6C8EBF;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1460" y="165" as="sourcePoint" />
+            <mxPoint x="1530" y="165" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend_esc_text" value="Эскалация" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="155" width="110" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend_err" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#B85450;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1460" y="195" as="sourcePoint" />
+            <mxPoint x="1530" y="195" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend_err_text" value="Исключение/Ошибка" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="185" width="110" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend_resp" value="" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#999999;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1460" y="225" as="sourcePoint" />
+            <mxPoint x="1530" y="225" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend_resp_text" value="Ответ/Возврат" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="215" width="110" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- ============== ПОСТУСЛОВИЯ ============== -->
+        
+        <mxCell id="post_frame" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1760" width="600" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="post_title" value="&lt;b&gt;ПОСТУСЛОВИЯ&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1765" width="150" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="post_success" value="&lt;b&gt;Успех основного потока:&lt;/b&gt;&#xa;• Jira-задача: статус &quot;Закрыт&quot; с label-ом Системы&#xa;• В журнале аудита есть запись&#xa;• SRE-инженер не был задействован" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1790" width="280" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="post_alt" value="&lt;b&gt;Альтернативный поток:&lt;/b&gt;&#xa;• Jira-задача не была создана автоматически&#xa;• Алерт в очереди на обработку SRE&#xa;• SRE-инженер получил уведомление" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="340" y="1790" width="280" height="80" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

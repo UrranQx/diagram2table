@@ -1,0 +1,8 @@
+<map id="диаграмма последовательнстей 2_map" name="диаграмма последовательнстей 2_map">
+<area shape="rect" id="id1" href="Возврат" title="Возврат" alt="" coords="247,544,294,558"/>
+<area shape="rect" id="id2" href="Возврат" title="Возврат" alt="" coords="177,688,232,702"/>
+<area shape="rect" id="id3" href="Отмена" title="Отмена" alt="" coords="227,293,286,307"/>
+<area shape="rect" id="id4" href="Отмена" title="Отмена" alt="" coords="157,969,229,983"/>
+<area shape="rect" id="id5" href="Оплата" title="Оплата" alt="" coords="167,837,249,851"/>
+<area shape="rect" id="id6" href="Заказ" title="Заказ" alt="" coords="237,426,326,440"/>
+</map>

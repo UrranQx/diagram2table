@@ -1,0 +1,119 @@
+%%{init: {
+  'theme': 'neutral',
+  'themeVariables': {
+    'primaryColor': '#F9F9F9',
+    'primaryTextColor': '#000000',
+    'primaryBorderColor': '#333333',
+    'lineColor': '#333333',
+    'secondaryColor': '#F9F9F9',
+    'tertiaryColor': '#F9F9F9',
+    'mainBkg': '#F9F9F9',
+    'nodeBorder': '#333333',
+    'clusterBkg': '#FFFFFF',
+    'clusterBorder': '#000000',
+    'defaultLinkColor': '#333333',
+    'edgeLabelBackground': '#FFFFFF',
+    'fontFamily': 'sans-serif'
+  },
+  'flowchart': { 
+    'curve': 'basis', 
+    'nodeSpacing': 100, 
+    'rankSpacing': 100 
+  }
+}}%%
+graph TD
+  classDef default fill:#F9F9F9,stroke:#333333,stroke-width:1px,color:black;
+  
+  classDef cluster fill:#FFFFFF,stroke:#000000,stroke-width:1px,color:black;
+
+  subgraph Actors [Акторы]
+    direction LR
+    User[fa:fa-user Пользователь]
+    Organizer[fa:fa-briefcase Организатор]
+    Moderator[fa:fa-gavel Модератор]
+    VenueStaff[fa:fa-id-badge Персонал]
+    Controller[fa:fa-qrcode Контролер]
+  end
+
+  subgraph AfishaSystem [Система Афиша]
+    
+    subgraph Frontend [Клиенты]
+      WebApp[Web Angular]
+      MobileApp[Mobile Flutter]
+    end
+
+    APIGateway[API Gateway Nginx]
+
+    subgraph Backend [Бэкенд-сервисы]
+      direction TB
+      APICore[API Core]
+
+      AnalyticsService[Analytics]
+      BookingService[Booking]
+      ModerationService[Moderation]
+      AuthService[Auth]
+      PaymentService[Payment]
+      EventService[Event]
+      NotificationService[Notification]
+
+      AnalyticsService ~~~ BookingService ~~~ ModerationService ~~~ AuthService ~~~ PaymentService ~~~ EventService ~~~ NotificationService
+    end
+
+    subgraph DataLayer [Слой данных]
+        style DataLayer fill:none,stroke:none
+
+        subgraph Databases [Базы данных]
+            Redis[(Redis)]
+            PostgreSQL[(PostgreSQL)]
+            Elasticsearch[(Elasticsearch)]
+            S3[(AWS S3)]
+            
+            Redis ~~~ PostgreSQL ~~~ Elasticsearch ~~~ S3
+        end
+
+        subgraph Queues [Очереди]
+            RabbitMQ[[RabbitMQ]]
+        end
+    end
+  end
+
+  subgraph External [Внешние системы]
+    direction LR 
+    SocialAuth[Social OAuth]
+    PaymentGateway[Payment Gateway]
+    VenueAPI[Venue API]
+    EmailSMS[Email & SMS]
+    
+    SocialAuth ~~~ PaymentGateway ~~~ VenueAPI ~~~ EmailSMS
+  end
+
+  User & Organizer & VenueStaff & Moderator --> WebApp
+  User & Controller --> MobileApp
+  WebApp & MobileApp --> APIGateway
+  APIGateway -- "прокси" --> APICore
+  APICore --> AnalyticsService & BookingService & ModerationService & AuthService & PaymentService & EventService & NotificationService
+
+  AuthService & BookingService -- "cache" --> Redis
+  AuthService & BookingService & PaymentService & AnalyticsService & EventService -- "SQL" --> PostgreSQL
+
+  EventService -- "REST" --> Elasticsearch
+  EventService -- "API" --> S3
+
+  NotificationService -- "pub/sub" <--> RabbitMQ
+
+  AuthService -- "OAuth" --> SocialAuth
+  PaymentService -- "API" --> PaymentGateway
+  EventService -- "JSON" --> VenueAPI
+
+  NotificationService -- "API" --> EmailSMS
+
+  BookingService -.-> EventService
+  PaymentService -.-> BookingService
+  ModerationService -.-> EventService
+
+  Redis ~~~ SocialAuth
+  PostgreSQL ~~~ PaymentGateway
+  Elasticsearch ~~~ VenueAPI
+  S3 ~~~ EmailSMS
+  
+  Databases ~~~ Queues

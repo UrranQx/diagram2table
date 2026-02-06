@@ -1,0 +1,60 @@
+classDiagram
+    class User {
+        +UUID id
+        +String email
+        +Subscription subscription
+        +playTrack()
+        +createPlaylist()
+    }
+
+    class Track {
+        +UUID id
+        +String title
+        +int duration
+        +bool regionRestricted
+        +stream()
+    }
+
+    class Artist {
+        +UUID id
+        +String name
+    }
+
+    class Album {
+        +UUID id
+        +String title
+        +Date releaseDate
+    }
+
+    class Playlist {
+        +UUID id
+        +String name
+        +addTrack()
+        +removeTrack()
+    }
+
+    class Subscription {
+        +UUID id
+        +String type
+        +Date startDate
+        +Date endDate
+        +bool autoRenew
+        +renew()
+        +cancel()
+    }
+
+    class PlaybackHistory {
+        +UUID id
+        +DateTime timestamp
+        +int playedDuration
+    }
+
+    %% Связи
+    User "1" -- "1" Subscription
+    User "1" -- "*" Playlist : owns >
+    Playlist "1" -- "*" Track : contains >
+    Album "1" -- "*" Track : contains >
+    Artist "1" -- "*" Album : creates >
+    User "1" -- "*" PlaybackHistory : has >
+    PlaybackHistory "1" -- "1" Track : refers >
+    Track "1" -- "1" Artist : by >

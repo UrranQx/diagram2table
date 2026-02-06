@@ -1,0 +1,67 @@
+@startuml
+left to right direction
+skinparam actorStyle stick
+
+actor "Клиент" as Client
+actor "Администратор\nковоркинга" as Admin
+actor "Бухгалтер" as Accountant
+actor "Платёжный\nсервис" as PSP
+actor "СКУД / система\nдоступа" as ACS
+
+rectangle "Система онлайн-бронирования\nковоркинга «Просто»" as System {
+
+  ' --- Основные прецеденты ---
+  usecase "Авторизация /\nрегистрация" as UC_Auth
+  usecase "Поиск и выбор\nрабочего места" as UC_Search
+  usecase "Оформление брони" as UC_Book
+  usecase "Оплата брони\nонлайн" as UC_Pay
+  usecase "Просмотр своих\nбронирований" as UC_ViewBookings
+  usecase "Отмена брони" as UC_Cancel
+  usecase "Просмотр бронирований\n(администратор)" as UC_AdminView
+  usecase "Изменить статус\nброни" as UC_ChangeStatus
+  usecase "Управлять рабочими\nместами и тарифами" as UC_ManagePlaces
+  usecase "Формирование отчёта\nо доходах" as UC_Report
+  usecase "Оформление доступа\nв коворкинг" as UC_Access
+
+  ' --- Авторизация / регистрация ---
+  usecase "Ввести данные\nрегистрации" as UC_Auth_Input
+  usecase "Проверить\nкорректность данных" as UC_Auth_Validate
+  usecase "Проверить уникальность\nemail" as UC_Auth_Unique
+  usecase "Создать учётную\nзапись" as UC_Auth_Create
+  usecase "Отправить письмо\nподтверждения" as UC_Auth_Mail
+  usecase "Активировать\nаккаунт" as UC_Auth_Activate
+
+  usecase "Email уже\nзарегистрирован" as UC_Auth_EmailExists
+  usecase "Пароль не соответствует\nтребованиям" as UC_Auth_BadPass
+  usecase "Ошибка отправки\nписьма" as UC_Auth_MailError
+  usecase "Ошибка записи в БД\n(регистрация)" as UC_Auth_DBError
+
+  ' --- Поиск и выбор места ---
+  usecase "Ввести параметры\nпоиска (дата/время)" as UC_Search_Input
+  usecase "Применить фильтры\n(тариф, зона)" as UC_Search_Filter
+  usecase "Отобразить доступные\nместа" as UC_Search_Show
+
+  usecase "Таймаут запроса\nпоиска" as UC_Search_Timeout
+  usecase "Ошибка связи с БД\n(поиск мест)" as UC_Search_DBError
+  usecase "Некорректные\nфильтры" as UC_Search_BadFilter
+
+  ' --- Оформление брони ---
+  usecase "Проверить доступность\nвыбранного места" as UC_Book_Check
+  usecase "Создать запись\nброни" as UC_Book_Create
+  usecase "Уведомить клиента\nо бронировании" as UC_Book_NotifyClient
+  usecase "Уведомить администратора\nо новой брони" as UC_Book_NotifyAdmin
+
+  usecase "Место уже занято" as UC_Book_AlreadyBooked
+  usecase "Превышен лимит\nброни для клиента" as UC_Book_Limit
+  usecase "Ошибка записи в БД\n(создание брони)" as UC_Book_DBError
+
+  ' --- Оплата брони ---
+  usecase "Перейти в платёжный\nсервис" as UC_Pay_GotoPSP
+  usecase "Получить ответ\nо платеже" as UC_Pay_Result
+  usecase "Обновить статус\nброни после оплаты" as UC_Pay_UpdateBooking
+  usecase "Уведомить клиента\nоб оплате" as UC_Pay_NotifyClient
+  usecase "Обработать\nонлайн-платёж" as UC_ProcPay
+
+  usecase "Платёж отклонён\nбанком" as UC_Pay_Declined
+  usecase "Пользователь отменил\nоплату" as UC_Pay_UserCancel
+  usecase "Ош

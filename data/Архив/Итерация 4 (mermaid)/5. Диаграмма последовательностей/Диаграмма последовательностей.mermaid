@@ -1,0 +1,43 @@
+sequenceDiagram
+    actor Пользователь as U
+    participant Frontend as F
+    participant BackendAPI as API
+    participant GeoService as GEO
+    participant PlayerService as PS
+    participant CDN as CDN
+
+    Note over U: Тип клиента: Web/Mobile/Desktop
+    
+    U->>F: Выбирает трек
+    F->>API: POST /api/play/track/{id}
+    
+    API->>GEO: checkAvailability(trackId, userRegion)
+    GEO-->>API: available: true/false
+    
+    alt Трек доступен
+        API->>PS: prepareStream(trackId, userSubscription)
+        PS-->>API: streamURL, metadata
+        API-->>F: 200 OK (streamURL + metadata)
+        
+        Note over F: Клиент-специфичное воспроизведение
+        alt Web клиент
+            F->>F: HTML5 Audio API.play()
+        else Мобильное приложение
+            F->>F: ExoPlayer/AVPlayer.play()
+        else Десктоп приложение
+            F->>F: Системный аудиофреймворк.play()
+        end
+        
+        F->>CDN: Запрос аудиопотока
+        CDN-->>F: Аудиоданные (chunked)
+        
+        loop Каждые 30 секунд
+            F->>API: POST /api/playback/log
+            API->>API: Обновление истории
+            API->>API: Отправка в рекомендации
+        end
+        
+    else Трек недоступен
+        API-->>F: 403 Forbidden + сообщение
+        F-->>U: "Трек недоступен в вашем регионе"
+    end

@@ -1,0 +1,178 @@
+@startuml class_diagram
+title Диаграмма классов
+
+skinparam class {
+  BackgroundColor #E1F5FE
+  BorderColor #01579B
+  ArrowColor #01579B
+  FontSize 12
+}
+
+class User {
+  -id: UUID
+  -email: String
+  -passwordHash: String
+  -firstName: String
+  -lastName: String
+  -phone: String
+  -role: Enum<UserRole>
+  -createdAt: DateTime
+  -updatedAt: DateTime
+  +register()
+  +login()
+  +updateProfile()
+  +changePassword()
+  +addPaymentMethod()
+}
+
+class Organizer {
+  -companyName: String
+  -taxId: String
+  -verificationStatus: Enum<VerificationStatus>
+  +createEvent()
+  +viewSalesStatistics()
+  +generateReport()
+}
+
+class Venue {
+  -id: UUID
+  -name: String
+  -address: String
+  -capacity: Integer
+  -contactPhone: String
+  -contactEmail: String
+  +uploadSeatMap()
+  +updateAvailability()
+}
+
+class Event {
+  -id: UUID
+  -title: String
+  -description: Text
+  -categoryId: UUID
+  -venueId: UUID
+  -startDateTime: DateTime
+  -endDateTime: DateTime
+  -ageRestriction: Integer
+  -status: Enum<EventStatus>
+  -moderationStatus: Enum<ModerationStatus>
+  +publish()
+  +cancel()
+  +updateDetails()
+}
+
+class Category {
+  -id: UUID
+  -name: String
+  -slug: String
+  -parentCategoryId: UUID
+}
+
+class TicketType {
+  -id: UUID
+  -eventId: UUID
+  -name: String
+  -price: Decimal
+  -quantity: Integer
+  -sold: Integer
+  +isAvailable(): Boolean
+  +reserve(quantity)
+}
+
+class Booking {
+  -id: UUID
+  -userId: UUID
+  -eventId: UUID
+  -status: Enum<BookingStatus>
+  -totalAmount: Decimal
+  -createdAt: DateTime
+  -expiresAt: DateTime
+  +addTicket()
+  +confirm()
+  +cancel()
+  +calculateTotal()
+}
+
+class Ticket {
+  -id: UUID
+  -bookingId: UUID
+  -ticketTypeId: UUID
+  -seatNumber: String
+  -qrCode: String
+  -status: Enum<TicketStatus>
+  +generateQR()
+  +validate()
+  +markAsUsed()
+}
+
+class Payment {
+  -id: UUID
+  -bookingId: UUID
+  -amount: Decimal
+  -currency: String
+  -method: Enum<PaymentMethod>
+  -status: Enum<PaymentStatus>
+  -transactionId: String
+  +process()
+  +refund()
+  +verify()
+}
+
+class Review {
+  -id: UUID
+  -userId: UUID
+  -eventId: UUID
+  -rating: Integer
+  -comment: Text
+  -createdAt: DateTime
+  +submit()
+  +edit()
+  +delete()
+}
+
+class ModerationLog {
+  -id: UUID
+  -eventId: UUID
+  -moderatorId: UUID
+  -action: Enum<ModerationAction>
+  -comment: Text
+  -createdAt: DateTime
+}
+
+User "1" -- "*" Booking : places
+User "1" -- "*" Review : writes
+Organizer "1" -- "*" Event : creates
+Venue "1" -- "*" Event : hosts
+Event "1" -- "*" TicketType : offers
+Event "1" -- "*" Category : belongs to >
+Category "1" -- "*" Category : subcategories
+Booking "1" -- "*" Ticket : contains
+Booking "1" -- "1" Payment : has
+TicketType "1" -- "*" Ticket : of type
+Event "1" -- "*" ModerationLog : moderated via
+User "1" -- "*" ModerationLog : moderates
+
+Event *-- TicketType : ticket types
+Booking *-- Ticket : tickets
+
+class Moderator extends User {
+  +approveEvent()
+  +rejectEvent()
+}
+
+class Admin extends User {
+  +manageUsers()
+  +systemSettings()
+}
+
+note top of User
+  Роли: USER, ORGANIZER, MODERATOR, ADMIN
+  Определяются полем role
+end note
+
+note right of Event
+  Статусы: DRAFT, MODERATION, PUBLISHED,
+  CANCELLED, FINISHED
+end note
+
+@enduml

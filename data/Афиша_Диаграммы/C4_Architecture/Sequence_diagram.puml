@@ -1,0 +1,95 @@
+@startuml sequence_diagram
+title Диаграмма последовательностей - Покупка билета
+
+autonumber "<b><color:DarkSlateBlue>.</color></b> "
+
+actor "Пользователь" as User
+participant "Веб-приложение" as WebApp
+participant "API Gateway" as Gateway
+participant "BookingController" as BookingController
+participant "BookingService" as BookingService
+participant "EventService" as EventService
+participant "PaymentService" as PaymentService
+participant "NotificationService" as NotificationService
+participant "База данных" as Database
+participant "Платежный шлюз" as PaymentGateway
+participant "Email-сервис" as EmailService
+
+== Выбор места и добавление в корзину ==
+User -> WebApp : Выбирает мероприятие и места
+WebApp -> Gateway : HTTP POST /api/events/{id}/reserve
+Gateway -> BookingController : reserveSeats(eventId, seats)
+BookingController -> BookingService : checkAvailability(eventId, seats)
+BookingService -> EventService : getEvent(eventId)
+EventService -> Database : SELECT event, ticket types
+Database --> EventService : данные мероприятия
+EventService --> BookingService : доступность мест
+alt места доступны
+  BookingService -> Database : INSERT временной брони (блокировка)
+  Database --> BookingService : успешно
+  BookingService --> BookingController : успешное резервирование
+  BookingController --> Gateway : 200 OK + reservationId
+  Gateway --> WebApp : ответ
+  WebApp --> User : места забронированы, таймер 15 мин
+else места недоступны
+  BookingService --> BookingController : ошибка "Места заняты"
+  BookingController --> Gateway : 409 Conflict
+  Gateway --> WebApp : ошибка
+  WebApp --> User : сообщение об ошибке
+end
+
+== Оформление заказа ==
+User -> WebApp : Переходит к оформлению заказа
+WebApp -> Gateway : HTTP POST /api/bookings/create
+Gateway -> BookingController : createBooking(reservationId, userData)
+BookingController -> BookingService : createBooking(reservationId, userId)
+BookingService -> Database : SELECT бронь, обновление статуса
+Database --> BookingService : успешно
+BookingService -> PaymentService : initiatePayment(bookingId, amount)
+PaymentService -> Database : запись платежа
+Database --> PaymentService : OK
+PaymentService --> BookingService : paymentPending
+BookingService --> BookingController : bookingCreated, paymentId
+BookingController --> Gateway : 201 Created + paymentUrl
+Gateway --> WebApp : ответ
+WebApp --> User : перенаправление на страницу оплаты
+
+== Оплата ==
+User -> WebApp : Нажимает "Оплатить"
+WebApp -> Gateway : HTTP POST /api/payments/{id}/process
+Gateway -> PaymentService : processPayment(paymentId)
+PaymentService -> PaymentGateway : запрос на списание средств
+PaymentGateway --> PaymentService : успешная транзакция
+PaymentService -> Database : обновление статуса платежа
+Database --> PaymentService : OK
+PaymentService -> BookingService : confirmPayment(bookingId)
+BookingService -> Database : обновление статуса бронирования
+Database --> BookingService : OK
+BookingService -> EventService : уменьшить квоту мест
+EventService -> Database : UPDATE ticket types
+Database --> EventService : OK
+BookingService -> NotificationService : sendBookingConfirmation(bookingId)
+NotificationService -> EmailService : отправка email с билетами
+EmailService --> NotificationService : принято
+NotificationService --> BookingService : уведомление отправлено
+BookingService --> PaymentService : платеж подтвержден
+PaymentService --> Gateway : 200 OK
+Gateway --> WebApp : успех
+WebApp --> User : отображение подтверждения, билеты отправлены на email
+
+== Альтернативный поток: ошибка оплаты ==
+alt оплата не прошла
+  PaymentGateway --> PaymentService : ошибка транзакции
+  PaymentService -> Database : обновление статуса платежа (FAILED)
+  Database --> PaymentService : OK
+  PaymentService -> BookingService : paymentFailed(bookingId)
+  BookingService -> Database : освобождение мест
+  Database --> BookingService : OK
+  BookingService -> NotificationService : sendPaymentFailure(user)
+  NotificationService -> EmailService : отправка email об ошибке
+  PaymentService --> Gateway : 402 Payment Required
+  Gateway --> WebApp : ошибка
+  WebApp --> User : предложение повторить оплату
+end
+
+@enduml

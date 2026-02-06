@@ -1,0 +1,88 @@
+@startuml
+title C3 - Компоненты контейнера Backend API
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(WebApp, "Web-клиент", "React / Vue")
+ContainerDb(DB, "База данных", "PostgreSQL")
+Container(Cache, "Кэш", "Redis (опционально)")
+
+System_Ext(PSP, "Платёжный провайдер")
+System_Ext(ACS, "СКУД / система доступа")
+System_Ext(Notifier, "Email / SMS сервис")
+
+Container_Boundary(Backend, "Backend API") {
+
+  ' Контроллеры
+  Component(AuthCtrl, "AuthController", "Controller", "Аутентификация/вход")
+  Component(BookCtrl, "BookingController", "Controller", "Бронирования")
+  Component(PayCtrl, "PaymentController", "Controller", "Платежи")
+  Component(AdminCtrl, "AdminController", "Controller", "Админ-операции")
+  Component(ReportCtrl, "ReportController", "Controller", "Отчёты")
+
+  ' Сервисы
+  Component(AuthSvc, "AuthService", "Service", "Логика аутентификации")
+  Component(UserSvc, "UserService", "Service", "Пользователи")
+  Component(BookSvc, "BookingService", "Service", "Логика бронирований")
+  Component(PaySvc, "PaymentService", "Service", "Логика оплат")
+  Component(ReportSvc, "ReportService", "Service", "Формирование отчётов")
+  Component(NotifSvc, "NotificationService", "Service", "Уведомления")
+  Component(AccessSvc, "AccessControlService", "Service", "Пропуска/доступ")
+
+  ' Репозитории
+  Component(UserRepo, "UserRepository", "Repository")
+  Component(WorkspaceRepo, "WorkspaceRepository", "Repository")
+  Component(BookingRepo, "BookingRepository", "Repository")
+  Component(TariffRepo, "TariffRepository", "Repository")
+  Component(PaymentRepo, "PaymentRepository", "Repository")
+  Component(AccessPassRepo, "AccessPassRepository", "Repository")
+
+  ' Адаптеры
+  Component(PayAdapter, "PaymentGatewayAdapter", "Adapter")
+  Component(EmailAdapter, "EmailSmsAdapter", "Adapter")
+  Component(AccessAdapter, "AccessControlAdapter", "Adapter")
+}
+
+' Контроллеры -> сервисы
+Rel(AuthCtrl, AuthSvc, "Вызывает")
+Rel(AuthCtrl, UserSvc, "Вызывает")
+Rel(BookCtrl, BookSvc, "Вызывает")
+Rel(PayCtrl, PaySvc, "Вызывает")
+Rel(AdminCtrl, BookSvc, "Вызывает")
+Rel(AdminCtrl, ReportSvc, "Вызывает")
+Rel(ReportCtrl, ReportSvc, "Вызывает")
+
+' Сервисы -> репозитории
+Rel(AuthSvc, UserRepo, "Читает/пишет")
+Rel(UserSvc, UserRepo, "Читает/пишет")
+
+Rel(BookSvc, BookingRepo, "Читает/пишет")
+Rel(BookSvc, WorkspaceRepo, "Читает")
+Rel(BookSvc, TariffRepo, "Читает")
+Rel(BookSvc, AccessPassRepo, "Читает/пишет")
+
+Rel(PaySvc, PaymentRepo, "Читает/пишет")
+Rel(PaySvc, BookingRepo, "Читает/обновляет")
+
+Rel(ReportSvc, BookingRepo, "Читает")
+Rel(ReportSvc, PaymentRepo, "Читает")
+
+Rel(AccessSvc, AccessPassRepo, "Читает/пишет")
+
+' Сервисы -> адаптеры -> внешние системы
+Rel(PaySvc, PayAdapter, "Использует")
+Rel(PayAdapter, PSP, "REST API")
+
+Rel(NotifSvc, EmailAdapter, "Использует")
+Rel(EmailAdapter, Notifier, "API")
+
+Rel(AccessSvc, AccessAdapter, "Использует")
+Rel(AccessAdapter, ACS, "API")
+
+' Контейнерные зависимости
+Rel(WebApp, Backend, "HTTPS/JSON")
+Rel(Backend, DB, "SQL")
+Rel(Backend, Cache, "Redis (опц.)")
+
+SHOW_LEGEND()
+@enduml
