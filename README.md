@@ -42,7 +42,7 @@ docker build -t diagram2table:local -f docker/Dockerfile .
 ```cmd
 docker compose -f docker/docker-compose.yml build --progress=plain --no-cache diagram2table-gpu
 ```
-Запуск:
+Запуск (убедитесь, что находитесь в директории docker):
 ```cmd
 docker compose up diagram2table-gpu
 ```
