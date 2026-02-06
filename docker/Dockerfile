@@ -25,8 +25,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     libxrender1 \
     libgomp1 \
+    imagemagick \
+    libmagickwand-dev \
+    librsvg2-bin \
     curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Ensure ImageMagick is allowed to read SVG (policy.xml may block SVG by default in some distros)
+RUN if [ -f /etc/ImageMagick-6/policy.xml ]; then \
+      sed -i '/pattern="SVG"/d' /etc/ImageMagick-6/policy.xml || true; \
+    fi
+
+# Quick verification: check that ImageMagick reports SVG support and Wand imports
+RUN convert -list format | grep SVG || true
+RUN magick -list format | grep SVG || true
+RUN python3.12 -c "import wand; print('Wand imported successfully')" || true
 
 # Make python3.12 the default
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1 \
