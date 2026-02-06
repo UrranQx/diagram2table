@@ -63,11 +63,11 @@ class JudgeResponse(BaseModel):
 )
 async def analyze_diagram(
     request: Request,
-    image: UploadFile = File(..., description="Diagram image (PNG, JPG, WEBP)"),
+    image: UploadFile = File(..., description="Diagram image (PNG, JPG, WEBP, SVG)"),
 ):
     """Analyze a diagram image and extract structured information.
 
-    - **image**: Diagram image file (PNG, JPG, WEBP supported)
+    - **image**: Diagram image file (PNG, JPG, WEBP, SVG supported)
     
     The service automatically:
     - Detects optimal tiling strategy based on image size
@@ -310,15 +310,10 @@ async def judge_diagram(
                     detail={"code": "CLIENT_DISCONNECTED", "message": "Client disconnected"},
                 )
             
-            # Run judge in thread pool
-            from PIL import Image as PILImage
-            import io
-            
-            pil_image = PILImage.open(io.BytesIO(image_bytes)).convert("RGB")
-            
+            # Use service for image conversion (handles SVG)
             result = await asyncio.to_thread(
                 service.judge,
-                image=pil_image,
+                image=image_bytes,
                 raw_text=raw_text,
             )
             

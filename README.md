@@ -1,20 +1,31 @@
-# РАБОТА В ПРОЦЕССЕ, МБ ЗАВТРА БУДЕТ ВСЕ ПО КРАСОТЕ, А ПОКА ТУТ ПРОСТО РАБОЧИЙ КОД
-## diagram2table" 
-Преобразование изображений диаграмм в markdown таблицу 
+# diagram2table 
+Преобразование изображений диаграмм в markdown таблицу.
+![UI example](image.png)
 
 ## Перед запуском
-uv venv diagram2table-env
-diagram2table-env\Scripts\activate   
-uv pip install -r requirements.txt
-uv pip install --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cu130
+### Используйте виртуальное окружение в `.venv`
+```cmd
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+# При наличии видеокарты с CUDA ядрами (для проверки nvidia-smi) запустить также:
+pip install --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cu130
+```
+**Примечание**: для поддержки SVG требуется ImageMagick на хост-системе (должен быть в PATH). Для локальной установки:
+- Windows: скачайте ImageMagick с https://imagemagick.org и включите опцию "Install development headers"
+- Linux (apt): sudo apt install imagemagick libmagickwand-dev
 
-Скачайте модель при помощи скрипта {SCPRIPT}
+### Рекомендукю заранее скачать  модель при помощи скрипта `scripts\download_models.py`
 ## Запуск проекта
+### Для запуска API + UI используйте параметр "both", а чтобы загрузить квантизированную модель (INT4) используйте флаг `--deployment-mode vlm_quantized`
+Вот например
+    `python -m src.main both --deployment-mode vlm_quantized`
+
+## Docker:
 
 
-
-    python -m src.main both --deployment-mode vlm_quantized
-
-## Полезные исследования в данной области
+## Ссылки на полезные исследования в данной области, а также похожие проекты
 - https://arxiv.org/abs/2511.22448
 - https://ieeexplore.ieee.org/document/9980425
+- https://huggingface.co/jtlicardo/bpmn-information-extraction-v2
+- https://github.com/PROSLab/BPMN-Redrawer

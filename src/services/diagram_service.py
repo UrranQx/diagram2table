@@ -138,14 +138,75 @@ class DiagramService:
         
         return result
 
-    def _to_pil_image(self, image: Union[Image.Image, str, bytes]) -> Image.Image:
-        """Convert various input types to PIL Image."""
+    def _is_svg_bytes(self, b: bytes) -> bool:
+        """Quick check whether bytes contain an SVG document."""
+        try:
+            header = b[:2048].decode("utf-8", errors="ignore").lower()
+            return "<svg" in header
+        except Exception:
+            return False
+
+    def _svg_bytes_to_png_bytes(self, svg_bytes: bytes, dpi: int = 100) -> bytes:
+        """Convert SVG bytes to PNG bytes using Wand (ImageMagick).
+
+        Raises RuntimeError when Wand/ImageMagick is not available, or ValueError
+        for conversion failure.
+        """
+        try:
+            from wand.image import Image as WandImage
+        except Exception as e:
+            logger.error("Wand import failed: %s", e)
+            raise RuntimeError("Wand is required to convert SVG to PNG. Install 'wand' and ensure ImageMagick is installed on the system.") from e
+
+        try:
+            with WandImage(blob=svg_bytes, resolution=dpi) as img:
+                img.format = "png"
+                png = img.make_blob("png")
+                return png
+        except Exception as e:
+            logger.exception("SVG -> PNG conversion failed")
+            raise ValueError(f"Failed to convert SVG to PNG: {e}") from e
+
+    def _svg_file_to_png_bytes(self, path: str, dpi: int = 100) -> bytes:
+        """Convert an SVG file on disk to PNG bytes using Wand."""
+        try:
+            from wand.image import Image as WandImage
+        except Exception as e:
+            logger.error("Wand import failed: %s", e)
+            raise RuntimeError("Wand is required to convert SVG to PNG. Install 'wand' and ensure ImageMagick is installed on the system.") from e
+
+        try:
+            with WandImage(filename=path, resolution=dpi) as img:
+                img.format = "png"
+                return img.make_blob("png")
+        except Exception as e:
+            logger.exception("SVG file -> PNG conversion failed for %s", path)
+            raise ValueError(f"Failed to convert SVG file to PNG: {e}") from e
+
+    def _to_pil_image(self, image: Union[Image.Image, str, bytes], svg_dpi: int = 100) -> Image.Image:
+        """Convert various input types to PIL Image. Supports SVG via Wand (DPI=100)."""
+        # PIL Image passthrough
         if isinstance(image, Image.Image):
             return image.convert("RGB") if image.mode != "RGB" else image
+
+        # File path
         elif isinstance(image, str):
-            return Image.open(image).convert("RGB")
+            lowered = image.lower()
+            if lowered.endswith(".svg"):
+                png_bytes = self._svg_file_to_png_bytes(image, dpi=svg_dpi)
+                return Image.open(io.BytesIO(png_bytes)).convert("RGB")
+            else:
+                return Image.open(image).convert("RGB")
+
+        # Bytes
         elif isinstance(image, bytes):
-            return Image.open(io.BytesIO(image)).convert("RGB")
+            # Detect inline SVG content
+            if self._is_svg_bytes(image):
+                png_bytes = self._svg_bytes_to_png_bytes(image, dpi=svg_dpi)
+                return Image.open(io.BytesIO(png_bytes)).convert("RGB")
+            else:
+                return Image.open(io.BytesIO(image)).convert("RGB")
+
         else:
             raise TypeError(f"Unsupported image type: {type(image)}")
 

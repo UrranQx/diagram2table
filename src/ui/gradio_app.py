@@ -55,14 +55,53 @@ def create_ui(
     # ============== Analysis Functions ==============
 
     def analyze_image(
-        image: Optional[Image.Image],
-    ) -> Tuple[str, str, str, float, Optional[str], Optional[str]]:
-        """Analyze diagram and return results."""
+        image: Optional[Union[Image.Image, str]],
+        preview_png: Optional[bytes],
+        md_filename: str,
+        txt_filename: str,
+    ) -> Tuple[str, str, str, float, tuple, tuple]:
+        """Analyze diagram and return results plus downloadable contents.
+
+        - `image`: path or PIL image (from file upload)
+        - `preview_png`: PNG bytes generated for preview (if any)
+        - `md_filename` / `txt_filename`: filenames the user wants for downloads
+
+        Returns:
+            table, raw_text, time_str, time_ms, md_download_tuple, txt_download_tuple
+        """
         if image is None:
             return "Ошибка: Пожалуйста, загрузите изображение диаграммы", "", "", 0.0, None, None
 
         try:
-            result = analyzer.analyze(image=image)
+            # Convert for API client mode if needed
+            if is_api_mode:
+                if isinstance(image, str) and image.lower().endswith('.svg'):
+                    if preview_png:
+                        pil_image = Image.open(io.BytesIO(preview_png))
+                    else:
+                        # Fallback conversion
+                        try:
+                            from wand.image import Image as WandImage
+                        except Exception as e:
+                            logger.exception("Wand not available to convert SVG for API mode: %s", e)
+                            raise RuntimeError("SVG support requires Wand and ImageMagick installed in the UI environment") from e
+
+                        with open(image, 'rb') as f:
+                            svg_bytes = f.read()
+                        with WandImage(blob=svg_bytes, resolution=100) as wimg:
+                            wimg.format = 'png'
+                            png_bytes = wimg.make_blob('png')
+                        pil_image = Image.open(io.BytesIO(png_bytes))
+                elif isinstance(image, str):
+                    pil_image = Image.open(image)
+                else:
+                    pil_image = image
+
+                result = analyzer.analyze(image=pil_image)
+
+            else:
+                # Direct DiagramService: pass path or PIL - it will handle SVG conversion server-side
+                result = analyzer.analyze(image=image)
 
             table = result.get("table", "")
             raw_text = result.get("raw_text", "")
@@ -70,23 +109,37 @@ def create_ui(
 
             time_str = f"{time_ms:.1f} мс"
 
-            # Create temporary files for download
-            md_file = tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False, encoding='utf-8')
-            md_file.write(table)
-            md_file.close()
+            # Prepare download payloads as file paths with user-specified names (safe)
+            import os
 
-            txt_file = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8')
-            txt_file.write(raw_text)
-            txt_file.close()
+            safe_md = os.path.basename(md_filename) or "diagram.md"
+            if not safe_md.lower().endswith(".md"):
+                safe_md = f"{safe_md}.md"
 
-            return table, raw_text, time_str, time_ms, md_file.name, txt_file.name
+            safe_txt = os.path.basename(txt_filename) or "diagram.txt"
+            if not safe_txt.lower().endswith(".txt"):
+                safe_txt = f"{safe_txt}.txt"
+
+            tmp_dir = tempfile.mkdtemp(prefix="d2t-")
+            md_path = os.path.join(tmp_dir, safe_md)
+            txt_path = os.path.join(tmp_dir, safe_txt)
+
+            with open(md_path, "w", encoding="utf-8") as f:
+                f.write(table)
+            with open(txt_path, "w", encoding="utf-8") as f:
+                f.write(raw_text)
+
+            md_download = md_path
+            txt_download = txt_path
+
+            return table, raw_text, time_str, time_ms, md_download, txt_download
 
         except Exception as e:
             logger.exception(f"Analysis failed: {e}")
             return f"Ошибка анализа: {e}", "", "", 0.0, None, None
 
     def evaluate_quality(
-        image: Optional[Image.Image],
+        image: Optional[Union[Image.Image, str]],
         raw_text: str,
     ) -> Tuple[int, int, int, int, int, str]:
         """Evaluate recognition quality using VLM judge."""
@@ -96,7 +149,16 @@ def create_ui(
             return 0, 0, 0, 0, 0, "Сначала выполните анализ"
 
         try:
-            result = analyzer.judge(image=image, raw_text=raw_text)
+            # API client expects a PIL Image
+            if is_api_mode:
+                if isinstance(image, str):
+                    pil = Image.open(image)
+                else:
+                    pil = image
+                result = analyzer.judge(image=pil, raw_text=raw_text)
+            else:
+                # Local service accepts path/PIL and handles SVG conversion
+                result = analyzer.judge(image=image, raw_text=raw_text)
 
             coverage = result.get("text_coverage", 0)
             accuracy = result.get("text_accuracy", 0)
@@ -162,11 +224,15 @@ def create_ui(
             with gr.TabItem("Анализ диаграммы"):
                 with gr.Row():
                     with gr.Column(scale=1):
-                        image_input = gr.Image(
-                            type="pil",
-                            label="Загрузите диаграмму",
-                            sources=["upload", "clipboard"],
+                        image_input = gr.File(
+                            label="Загрузите диаграмму (PNG, JPG, WEBP, SVG)",
+                            file_count="single",
+                            file_types=[".svg", ".png", ".jpg", ".jpeg", ".webp"],
                         )
+
+                        # Preview image (shows SVG converted to PNG for preview)
+                        preview_image = gr.Image(label="Предпросмотр", interactive=False)
+                        preview_png_state = gr.State(value=None)
 
                         analyze_btn = gr.Button(
                             "Анализировать",
@@ -209,14 +275,53 @@ def create_ui(
                         overall_score = gr.Number(label="Overall (0-100)", interactive=False)
                         judge_notes = gr.Textbox(label="Примечания", interactive=False, lines=2)
 
+                        # File name inputs for downloads
+                        md_filename = gr.Textbox(label="Имя файла MD", value="diagram.md")
+                        txt_filename = gr.Textbox(label="Имя файла TXT", value="diagram.txt")
+
                         with gr.Row():
                             md_download = gr.DownloadButton(label="Скачать MD", variant="secondary")
                             txt_download = gr.DownloadButton(label="Скачать TXT", variant="secondary")
 
+                # Connect file change to preview generator
+                def _generate_preview(file_path: Optional[str]):
+                    """Return (PIL.Image or None, png_bytes or None) for preview and state."""
+                    if not file_path:
+                        return None, None
+                    try:
+                        from PIL import Image as PILImage
+                        import io
+                        p = file_path
+                        if isinstance(p, str) and p.lower().endswith('.svg'):
+                            try:
+                                from wand.image import Image as WandImage
+                            except Exception:
+                                raise RuntimeError("SVG preview requires Wand and ImageMagick in the UI environment")
+                            with open(p, 'rb') as f:
+                                svg_bytes = f.read()
+                            with WandImage(blob=svg_bytes, resolution=100) as wimg:
+                                wimg.format = 'png'
+                                png = wimg.make_blob('png')
+                            return PILImage.open(io.BytesIO(png)), png
+                        else:
+                            img = PILImage.open(p)
+                            buf = io.BytesIO()
+                            img.convert('RGB').save(buf, format='PNG')
+                            return img, buf.getvalue()
+                    except Exception as e:
+                        logger.exception("Preview generation failed: %s", e)
+                        return None, None
+
+                image_input.change(
+                    fn=_generate_preview,
+                    inputs=[image_input],
+                    outputs=[preview_image, preview_png_state],
+                )
+
                 # Connect analyze button
                 analyze_btn.click(
                     fn=analyze_image,
-                    inputs=[image_input],
+                    inputs=[image_input, preview_png_state, md_filename, txt_filename],
                     outputs=[table_output, raw_text_output, time_output, time_ms_hidden, md_download, txt_download],
                 )
 
@@ -270,7 +375,7 @@ def create_ui(
         gr.Markdown(
             """
             ---
-            **Diagram2Table** v2.0.0 | ML Pipeline by colleague
+            **Diagram2Table** v0.1.0 
             """
         )
 
